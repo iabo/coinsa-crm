@@ -1,0 +1,107 @@
+name: Publish Docs to OneDrive
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**/*.md'
+      - '*.md'
+
+jobs:
+  convert-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Install Pandoc ─────────────────────────────────────────────────
+      - name: Install Pandoc
+        run: |
+          wget -q https://github.com/jgm/pandoc/releases/download/3.2/pandoc-3.2-1-amd64.deb
+          sudo dpkg -i pandoc-3.2-1-amd64.deb
+
+      # ── 3. Convert all .md files to .docx ────────────────────────────────
+      - name: Convert Markdown to DOCX
+        run: |
+          mkdir -p output
+
+          # Use the reference template for consistent branding
+          # Falls back to plain conversion if template not present
+          TEMPLATE_FLAG=""
+          if [ -f "docs/reference-template.docx" ]; then
+            TEMPLATE_FLAG="--reference-doc=docs/reference-template.docx"
+          fi
+
+          find . -name "*.md" \
+            ! -path "./.git/*" \
+            ! -name "README.md" \
+            | while read mdfile; do
+
+            # Preserve directory structure in output/
+            relpath="${mdfile#./}"
+            outfile="output/${relpath%.md}.docx"
+            mkdir -p "$(dirname "$outfile")"
+
+            echo "Converting: $mdfile → $outfile"
+            pandoc "$mdfile" \
+              -o "$outfile" \
+              $TEMPLATE_FLAG \
+              --toc \
+              --toc-depth=3 \
+              -V geometry:margin=1in \
+              --standalone
+          done
+
+      # ── 4. Get an OAuth token from Azure ──────────────────────────────────
+      - name: Get Microsoft Graph token
+        id: get_token
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            "https://login.microsoftonline.com/${{ secrets.AZURE_TENANT_ID }}/oauth2/v2.0/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=${{ secrets.AZURE_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.AZURE_CLIENT_SECRET }}" \
+            -d "scope=https://graph.microsoft.com/.default" \
+            -d "grant_type=client_credentials")
+
+          TOKEN=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      # ── 5. Upload each .docx to OneDrive ──────────────────────────────────
+      - name: Upload DOCX files to OneDrive
+        env:
+          TOKEN: ${{ steps.get_token.outputs.token }}
+          # The OneDrive folder path to upload into (no leading slash)
+          ONEDRIVE_FOLDER: ${{ secrets.ONEDRIVE_FOLDER }}
+          # The user whose OneDrive to target (your email)
+          ONEDRIVE_USER: ${{ secrets.ONEDRIVE_USER }}
+        run: |
+          find output -name "*.docx" | while read docxfile; do
+            filename=$(basename "$docxfile")
+            echo "Uploading: $filename"
+
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X PUT \
+              "https://graph.microsoft.com/v1.0/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER}/${filename}:/content" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document" \
+              --data-binary "@$docxfile")
+
+            if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+              echo "  ✓ Uploaded $filename (HTTP $HTTP_STATUS)"
+            else
+              echo "  ✗ Failed to upload $filename (HTTP $HTTP_STATUS)"
+              exit 1
+            fi
+          done
+
+      # ── 6. Summary ────────────────────────────────────────────────────────
+      - name: Print summary
+        if: success()
+        run: |
+          COUNT=$(find output -name "*.docx" | wc -l)
+          echo "✅ Successfully converted and uploaded $COUNT document(s) to OneDrive."
