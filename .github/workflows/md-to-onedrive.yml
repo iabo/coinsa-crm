@@ -84,9 +84,11 @@ jobs:
             filename=$(basename "$docxfile")
             echo "Uploading: $filename"
 
+            ENCODED_PATH=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${ONEDRIVE_FOLDER}/${filename}'))")
+
             HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
               -X PUT \
-              "https://graph.microsoft.com/v1.0/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER}/${filename}:/content" \
+              "https://graph.microsoft.com/v1.0/users/${ONEDRIVE_USER}/drive/root:/${ENCODED_PATH}:/content" \
               -H "Authorization: Bearer ${TOKEN}" \
               -H "Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document" \
               --data-binary "@$docxfile")
