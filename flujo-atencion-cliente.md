@@ -3,6 +3,7 @@
 ```mermaid
 flowchart TD
     A([INICIO]) --> B["Contacto Inicial"]
+    B -.-> NOTE_B["📞 Ventas Internas: 662-213-0303"]
     B --> D["Ventas Internas recibe el contacto."]
     D --> D2["Crea lead en CRM y etiqueta el medio de contacto."]
 
@@ -10,6 +11,7 @@ flowchart TD
     D2 --> D3{"¿Es venta común o compleja?"}
     D3 -->|"Común"| G["Recibe lead. Reúne info y elabora cotización."]
     D3 -->|"Compleja"| D4["Asigna Vendedor de Campo por zona geográfica."]
+    D4 -.-> NOTE_D4["📍 Tijuana: Miguel Gaytán\n📍 Nogales: Arnoldo López"]
     D4 --> D5["Marca en CRM como Venta Compleja."]
     D5 --> G
 
@@ -47,7 +49,7 @@ flowchart TD
     Q -->|No| O["Odoo genera orden de compra a COMPRAS."]
     Q -->|"Sí, hay stock"| SAL
     O --> MAT["Llega el material y se le da entrada."]
-    MAT --> SAL["Generar orden de salida en Odoo."]
+    MAT --> SAL["Generar orden de salida en Odoo.\nSe reserva material del inventario."]
 
     SAL --> T["FACTURACIÓN: Emite factura (material listo)."]
     T --> U["Adjunta OC e instrucciones de entrega en Odoo."]
@@ -57,6 +59,8 @@ flowchart TD
     style A fill:#2d7a2d,color:#fff
     style W fill:#4169e1,color:#fff
     style D2 fill:#6a0dad,color:#fff
+    style NOTE_B fill:#fff3cd,color:#856404,stroke:#ffc107,stroke-dasharray:5 5
+    style NOTE_D4 fill:#fff3cd,color:#856404,stroke:#ffc107,stroke-dasharray:5 5
     style KPI1 fill:#fff3cd,color:#856404,stroke:#ffc107,stroke-dasharray:5 5
     style H fill:#f0c040,color:#000
     style L fill:#f0c040,color:#000

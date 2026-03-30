@@ -141,11 +141,125 @@ another test 5
 - Actividades 
 - Etapas 
 
-
 - modulo de visitas . 
 
+# Session de trabajo 3 ::
+
+- Empezamos con actividad de 4 preguntas :: 
+ 1 .- Como organizariamos a nuestros clientes en Odoo ?
+ 2 .- Que tipo de relacion tenemos con nuestros clientes por grupo?
+ 3 .- Quien es el responsable de cada grupo de clientes ?
+ 4 .- Que informacion es importante para cada grupo de clientes ?
+
+-------------
+ Adriana 
+ 1 - Clientes Triple AAA, normal, Revendedor o integrado 
+ o por industria 
+ o por lineas de producto 
+ 2 - 
+
+ Pablos 
+ 1 - Locales , Regionales,, vendodor en zona, foraneos sin presencia fisica , Coporativos / portales / mercado digital 
+
+Guillermo : : 
+ 1 - *** Vip volumen alto de ventas , lealtad alta, negocacion consideracion para cotizaciones , cumplimiento buen score de credito 
+    ** Clientes Recurrentes, volumen medio alto, lealtad media,  cumplimiento de credito medio - alto
+ * Morosos volumen medio alto - lealtd media, cumplimiento bajo 
+ * Clientes regulares, volumn bajo-medio, leatad medio, cumplimiento bajo
+ * Clientes esporadicos, volumen bajo, lealtad baja, cumplimiento bueno, ventas de contado 
+
+-------------------------------------------------------------------------------------------  
+inge pablos 
+Se plantea que pudiera ser necesario ampliar presencia regional 
+-------------------------------------------------------------------------------------------  
+
+2 Tipo de relacion 
+Adriana :: 
+Por periodo , 
+
+Pablos :: 
+Visitas constantes, Foraneos, Campañas de marketing , posicionamites, digital,
+contactos :: tipo de gente que nos contacta, departametos de compras, gerentes, usuarios finales, 
+
+Guillermo : 
+Enfoque por volumen de ventas, lealtad y cumplimiento de credito.
+
+-------------------------------------------------------------------------------------------
+
+3 Responsables por grupo de clientes
+Adriana :: Vendedor , Coordinacion, Administrativo. 
+Pablos :: igual 
+Guillermo ::  Vendedor
+
+-------------------------------------------------------------------------------------------
+4 Guillermo :: cobranza, compras, almacen, Conve
+
+Pablos , 
+conversion de cotizacion a pedios, % de abteo ,  -> de ahi salen cotiazaciones , 
+Clientes perfilados a AAA
+
+Cuanto me ha comprado , de cual producto, complementos de 
+Ticke 
+
+Guillermo :: 
+- Volume
+- por marca, por producto, 
+- numero de ordenes de Compra
+- Ticket promedio 
+- % de bateo 
+- Status de credito
+- 
+
+- cumplimientos de tiempos de entrega 
+- SLA - relacionado con lo de abajo 
+- Prometemos entradas entregas que no cumplen con lo que se conversio, es decir , prometemos x dias para cerrar, pero al final no se puede cumplir, 
+
+--------
+
+Personal Involucrado Comercial :: 
+- 
+Sesion Sabado Posponer :: a Lunes 30 3:30pm - 5:30 
+
+--------
+
+# Stakeholders
 
 
+# Usuarios de CRM :: 
+
+# Vendedores :: 
+- Tabla de vendedores con sus responsabilidades en correo 
+
+# Recepcion ::
+- Martha Molina // Recepcionista, atencion a clientes, canal de comunicacion, recepcion de llamadas, whatsapp, correo, etc.
+- Es facturacion, a ella le llega salida y busca la venta para poder facturar, entonces es un punto de contacto importante para el proceso comercial, porque es la que se encarga de facturar y tiene contacto con los clientes, entonces es importante que ella tenga acceso a Odoo para revisar las cotizaciones y las ordenes de venta para poder facturar.
+
+# Almacén ::
+- Irma castillo //  Jefa de Almacen, responsable de la gestion de inventarios, control de stock, coordinación de entregas y recepcion de materiales. 
+- Jesus Valle // Aux. Almacen, entregas  // 13mil pel peso al mes 
+
+# Compras :: 
+ - Edna Rivera // compradora
+ - Melissa Lopez // Aux. Compras 
+ - Valeria Flores // compras int. 
+ # Contabilidad ::
+  - Adriana Real // Contadora  
+  - Javier Pablos // Director Comercial
+
+## Patrocinadores
+> Los patrocinadores son los principales interesados en el éxito del proyecto y tienen la autoridad para tomar decisiones clave.
+| Nombre | Rol | Intereses clave |
+|---|---|---|
+| | CEO | Visión estratégica, ROI, crecimiento del negocio |
+| | CFO | Control de costos, eficiencia operativa |
+| | Director Comercial | Mejora de procesos de ventas, satisfacción del cliente |
+
+
+## Equipo de Proyecto
+> El equipo de proyecto es responsable de la ejecución del proyecto y la entrega de los resultados.
+| Nombre | Rol | Responsabilidades |
+|---|---|---|
+| | Project Manager | Planificación, coordinación y seguimiento del proyecto |
 
 
 
