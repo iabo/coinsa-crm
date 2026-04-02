@@ -24,18 +24,19 @@
 
 | Nombre | Área | Procesos que valida |
 |---|---|---|
-|| Ing. Arturo | Ventas e Ingeniería | Cotizaciones, oportunidades, pipeline de ventas técnicas |
-|| Rosita | Soporte Comercial | Atención al cliente, soporte postventa, seguimiento de casos |
+| Arturo Gil Armenta | Ventas e Ingeniería | Cotizaciones, oportunidades, pipeline de ventas técnicas |
+| Guillermo Velez Sabag | Coordinación de Ventas | Pipeline CRM, coordinación del equipo de ventas, validación de procesos |
+| Rosa Estrada Nambo | Soporte Comercial | Atención al cliente, soporte postventa, seguimiento de casos |
 || | Marketing | Leads, campañas |
 || | Gerencia | Reportes y dashboards |
 
-### Perfil — Rosita (Soporte Comercial)
-- **Rol actual:** 
-- **Proceso actual:** 
-- **No usa:** 
-- **Pain point principal:** 
-- **Proceso que falta (gap):** 
-- **Usuario crítico para:** 
+### Perfil — Rosa Estrada Nambo (Soporte Comercial)
+- **Rol actual:** Soporte Comercial — atención al cliente postventa y seguimiento de casos
+- **Proceso actual:** Recibe solicitudes de clientes → coordina con ventas y almacén → da seguimiento hasta resolución
+- **No usa:** CRM ni Odoo para registro formal de casos
+- **Pain point principal:** Sin sistema centralizado; el seguimiento de casos vive en correos y llamadas informales
+- **Proceso que falta (gap):** Registro y seguimiento de incidencias postventa en Odoo; historial de soporte por cliente
+- **Usuario crítico para:** Validación del flujo de soporte postventa y definición del proceso de atención en CRM
 
 ### Perfil — Marketing
 - **Rol actual:** 

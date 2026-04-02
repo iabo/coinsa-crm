@@ -11,6 +11,7 @@ flowchart TD
         C3["📞 Llamada Telefónica"]
         C4["🎪 Feria · Exposición · Plática PSI"]
         C5["🙋 Prospección propia\ndel vendedor"]
+        C6["🔍 Minado de base\nde datos interna"]
     end
 
     subgraph EVENTO["Flujo Post-Evento  (Vendedor responsable del evento)"]
@@ -25,6 +26,12 @@ flowchart TD
         P1["Identifica prospecto:\nvisita · referido · red de contactos"]
         P2["Crea Lead directamente\nen Odoo CRM"]
         P3["📌 Etiqueta origen:\nProspección propia"]
+    end
+
+    subgraph MINADO["Minería de Base de Datos Interna  (Ventas / Datos)"]
+        M1["Filtra clientes inactivos\no sin actividad reciente en Odoo"]
+        M2["Genera lista de\nprospectos candidatos"]
+        M3["📌 Crea Leads en CRM\nEtiqueta: BD Interna"]
     end
 
     subgraph HERME["Ventas Internas — Hermenegildo"]
@@ -51,6 +58,10 @@ flowchart TD
 
     %% Canal de prospección propia → flujo autogestionado
     C5 --> P1
+    C6 --> M1
+    M1 --> M2
+    M2 --> M3
+    M3 --> SLA
     P1 --> P2
     P2 --> P3
     P3 --> H3
@@ -109,6 +120,9 @@ flowchart TD
 
     style PIPE fill:#2d7a2d,color:#fff
     style ARCH fill:#c0392b,color:#fff
+    style C6 fill:#5c6bc0,color:#fff,stroke:none
+    style MINADO fill:#e8eaf6,stroke:#5c6bc0
+    style M3 fill:#6a0dad,color:#fff
 ```
 
 ---
@@ -123,6 +137,7 @@ flowchart TD
 | Llamada telefónica | Hermenegildo | Odoo CRM (actividad manual) |
 | Feria / Exposición / Plática PSI | Vendedor asistente | CSV post-evento → Odoo CRM |
 | Prospección propia del vendedor | Vendedor (autogestionado) | Captura directa en Odoo CRM |
+| Minado de base de datos interna | Ventas / Administración | Filtrado en Odoo Contactos → creación de Leads con etiqueta «BD Interna» |
 
 ### Regla de carga post-evento
 - **≥ 6 contactos:** carga masiva por CSV para agilizar el ingreso.

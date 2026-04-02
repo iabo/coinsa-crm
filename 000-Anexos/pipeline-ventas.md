@@ -70,7 +70,8 @@
 | Email entrante | Correo de interés directo |
 | LinkedIn / Redes Sociales | Prospección digital |
 | Evento / Feria | Contacto en evento presencial |
-| [Fuente X] | [Canal] |
+| Base de datos interna | Minado de clientes existentes o inactivos en Odoo |
+| Plática PSI / Evento técnico | Contacto captado en presentación técnica (PSI u otros eventos) |
 
 ---
 
@@ -97,3 +98,22 @@
 | Recordatorio de seguimiento | Actividad vencida | Email al vendedor |
 | Notificación de oportunidad ganada | Etapa cambia a "Ganado" | Email al supervisor del equipo |
 | Solicitud de feedback | Etapa cambia a "Perdido" | Tarea automática: registrar motivo |
+
+---
+
+## Variante de Pipeline — Ventas Técnicas (Ing. Arturo)
+
+> Pendiente de decisión en Sesión 4 (punto 5).
+> Para oportunidades de ingeniería, se evalúa agregar una etapa intermedia de **Diseño Técnico** antes de la propuesta formal.
+
+| # | Etapa | Probabilidad | Descripción |
+|---|---|---|---|
+| 1 | Nuevo Lead | 10% | Lead recibido |
+| 2 | Contactado | 20% | Primer contacto confirmado |
+| 3 | **Diseño Técnico** | **40%** | **Arturo diseña la solución y registra especificaciones en la oportunidad de Odoo** |
+| 4 | Propuesta Enviada | 60% | Cotización con especificaciones técnicas enviada al cliente |
+| 5 | En Negociación | 80% | Negociando términos y condiciones |
+| 6 | Ganado | 100% | Orden de venta confirmada |
+| — | Perdido | 0% | Registrar motivo (obligatorio) |
+
+**Consideración:** Esta variante puede configurarse como pipeline independiente para el equipo de ventas técnicas en Odoo, manteniendo el pipeline estándar para ventas internas (Hermenegildo, Guillermo, Miguel).
