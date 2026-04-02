@@ -17,6 +17,7 @@
   ▼ (propuesta enviada)
 [PROPUESTA ENVIADA]
   │
+  |   Ganado-Perdido 
   ▼ (negociación)
 [EN NEGOCIACIÓN]
   │

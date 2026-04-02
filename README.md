@@ -224,7 +224,6 @@ Sesion Sabado Posponer :: a Lunes 30 3:30pm - 5:30
 
 # Stakeholders
 
-
 # Usuarios de CRM :: 
 
 # Vendedores :: 
@@ -246,24 +245,9 @@ Sesion Sabado Posponer :: a Lunes 30 3:30pm - 5:30
   - Adriana Real // Contadora  
   - Javier Pablos // Director Comercial
 
-## Patrocinadores
-> Los patrocinadores son los principales interesados en el éxito del proyecto y tienen la autoridad para tomar decisiones clave.
-| Nombre | Rol | Intereses clave |
-|---|---|---|
-| | CEO | Visión estratégica, ROI, crecimiento del negocio |
-| | CFO | Control de costos, eficiencia operativa |
-| | Director Comercial | Mejora de procesos de ventas, satisfacción del cliente |
+ # Limpieza de datos :: 
 
-
-## Equipo de Proyecto
-> El equipo de proyecto es responsable de la ejecución del proyecto y la entrega de los resultados.
-| Nombre | Rol | Responsabilidades |
-|---|---|---|
-| | Project Manager | Planificación, coordinación y seguimiento del proyecto |
-
-
-
-
+ 
 
 
 
