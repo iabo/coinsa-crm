@@ -13,6 +13,8 @@
 | SLA-02 | Envío de cotización desde solicitud | ≤ 3 días hábiles | Fecha de creación de la oportunidad vs. fecha de envío de cotización desde Odoo |
 | SLA-03 | Seguimiento post-cotización sin respuesta del cliente | ≤ 5 días hábiles | Actividad de seguimiento programada automáticamente al enviar la cotización |
 | SLA-04 | Respuesta interna a solicitud de descuento | ≤ 1 día hábil | Tarea asignada a Coordinación Comercial (Javier Pablos) desde Odoo |
+| SLA-05 | Devolución de llamada a prospecto no atendido | ≤ 4 horas hábiles | Recepción registra el contacto en Odoo con actividad de devolución de llamada asignada a Hermenegildo |
+| SLA-06 | Captura de datos completos en llamada entrante | 100% de contactos (nombre + teléfono + empresa + motivo) | Revisión semanal de leads con datos incompletos en CRM |
 
 ---
 
@@ -21,6 +23,18 @@
 - **Alerta de inactividad:** Configurar regla de automatización en CRM para notificar al vendedor y supervisor cuando una oportunidad lleva `X` días sin actividad registrada.
 - **Pipeline visual:** Oportunidades con actividad vencida aparecen en **rojo** en la vista Kanban — revisión diaria recomendada.
 - **Reunión semanal:** Revisión del cumplimiento de SLA con el Director Comercial como parte de la reunión de pipeline.
+
+---
+
+## Hallazgos del Diagnóstico Inicial (Marco Jacobo, 02/03/2026)
+
+Pruebas realizadas sobre el proceso de captación real detectaron los siguientes puntos de fuga:
+
+| # | Canal | Hallazgo | Acción correctiva |
+|---|---|---|---|
+| D-01 | Llamada telefónica (8:00 am) | Sin respuesta; sin personal asignado en ese horario | Definir y publicar horario oficial de atención telefónica |
+| D-02 | Llamada telefónica (12:56 pm) | Recepción contestó pero solo capturó el nombre; sin devolución de llamada posterior | Implementar protocolo de captura obligatoria + registro en Odoo (ver SLA-05 y SLA-06) |
+| D-03 | Formulario web | Bug con caracteres especiales — correos con signos no se envían correctamente | Reportar al equipo técnico del sitio; canal inhabilitado como fuente confiable hasta corrección |
 
 ---
 

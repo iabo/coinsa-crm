@@ -22,7 +22,7 @@ Meter a los usuarios de ventas (comenzando con Ing. Arturo) en Odoo CRM para que
 - [ ] Centralizar el historial de cotizaciones y comunicaciones por cliente
 
 ### Tecnológicos
-- [ ] Integrar CRM con [sistemas existentes: ERP, correo, etc.]
+- [ ] Integrar CRM con correo electrónico corporativo y proceso comercial existente
 - [ ] Garantizar trazabilidad completa de cada oportunidad
 - [ ] Habilitar reportes y dashboards en tiempo real
 
@@ -30,20 +30,20 @@ Meter a los usuarios de ventas (comenzando con Ing. Arturo) en Odoo CRM para que
 
 | KPI | Baseline (actual) | Meta | Plazo |
 |---|---|---|---|
-| Tasa de conversión lead → oportunidad | % | % | |
-| Tasa de conversión oportunidad → cliente | % | % | |
-| Tiempo promedio de cierre | días | días | |
-| Leads sin actividad > X días | # | # | |
-| Adopción del sistema por usuarios | % | % | |
+| Tasa de conversión lead → oportunidad | No medido | ≥ 35% | 90 días post go-live |
+| Tasa de conversión oportunidad → cliente | No medido | ≥ 20% | 120 días post go-live |
+| Tiempo promedio de cierre | No medido | Línea base levantada y reducción del 15% | 6 meses |
+| Leads sin actividad > 7 días | Alto / no controlado | < 10% del total activo | 90 días post go-live |
+| Adopción del sistema por usuarios | 0% en CRM para equipo objetivo | ≥ 85% uso semanal | 60 días post go-live |
 
 ## Restricciones y Supuestos
 
 ### Restricciones
-- Presupuesto: 
-- Plazo máximo: 
-- Recursos disponibles: 
+- Presupuesto: Por definir en aprobación comercial
+- Plazo máximo: 16 semanas estimadas para fase inicial
+- Recursos disponibles: usuarios clave con disponibilidad parcial y equipo consultor por asignar
 
 ### Supuestos
 - Los usuarios clave estarán disponibles para validaciones
-- La infraestructura de Odoo estará lista para [fecha]
+- La infraestructura de Odoo estará lista antes del inicio de configuración
 - Los datos a migrar están disponibles y accesibles

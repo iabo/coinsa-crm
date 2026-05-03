@@ -1,9 +1,9 @@
 # Arquitectura de la Solución
 
 ## Versión Odoo
-- **Versión:** Odoo [16/17] Community / Enterprise
-- **Tipo de despliegue:** [Cloud / On-premise / Odoo.sh]
-- **Base de datos:** PostgreSQL [versión]
+- **Versión:** Odoo 17 Enterprise
+- **Tipo de despliegue:** Cloud / instancia administrada
+- **Base de datos:** PostgreSQL 15
 
 ---
 
@@ -42,12 +42,12 @@
 
 | Componente | Tecnología | Versión | Notas |
 |---|---|---|---|
-| ERP/CRM | Odoo | | Community / Enterprise |
-| Base de datos | PostgreSQL | | |
-| Servidor web | Nginx / Apache | | Proxy reverso |
+| ERP/CRM | Odoo | 17 | Enterprise |
+| Base de datos | PostgreSQL | 15 | Base transaccional principal |
+| Servidor web | Nginx | Estándar | Proxy reverso |
 | Lenguaje backend | Python | 3.10+ | |
 | Frontend | OWL (Odoo Web Library) | | |
-| OS del servidor | Ubuntu / Debian | | |
+| OS del servidor | Ubuntu | 22.04 LTS | |
 | Caché | Redis | | Opcional |
 
 ---
@@ -73,7 +73,7 @@
 ### Módulos OCA (si aplica)
 | Módulo | Repositorio | Descripción |
 |---|---|---|
-| | | |
+| Ninguno en fase inicial | N/A | La fase 1 prioriza configuración estándar y automatizaciones nativas |
 
 ---
 
@@ -81,9 +81,9 @@
 
 | Ambiente | URL | Propósito | Actualizaciones |
 |---|---|---|---|
-| Desarrollo | | Desarrollo y pruebas internas del equipo consultor | Continuas |
-| Staging | | Pruebas UAT y validación con usuarios clave | Por sprint |
-| Producción | | Ambiente productivo de COINSA | Solo go-live y releases aprobados |
+| Desarrollo | Por definir | Desarrollo y pruebas internas del equipo consultor | Continuas |
+| Staging | Por definir | Pruebas UAT y validación con usuarios clave | Por sprint |
+| Producción | Por definir | Ambiente productivo de COINSA | Solo go-live y releases aprobados |
 
 ---
 
@@ -103,5 +103,5 @@
 
 - Frecuencia: Diaria (automática)
 - Retención: 30 días
-- Almacenamiento: [Destino de backup]
-- Responsable: [Admin de sistemas]
+- Almacenamiento: almacenamiento administrado del proveedor cloud + respaldo externo
+- Responsable: Administrador de Sistemas / proveedor de hosting

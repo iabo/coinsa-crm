@@ -38,9 +38,9 @@ NIVEL 3 — Soporte técnico / desarrollador
 
 | Canal | Para qué | Disponibilidad |
 |---|---|---|
-| [Email de soporte] | Reportar incidencias | 24/7 (respuesta en horario laboral) |
-| [Sistema de tickets] | Seguimiento de incidencias | |
-| [WhatsApp / Slack] | Urgencias P1/P2 | Horario laboral |
+| soporte.crm@coinsa.com | Reportar incidencias y dudas funcionales | 24/7 (respuesta en horario laboral) |
+| Backlog / registro de incidencias en Odoo o herramienta acordada | Seguimiento de incidencias y mejoras | Horario laboral |
+| WhatsApp corporativo / grupo operativo | Urgencias P1/P2 | Horario laboral |
 | [Teléfono] | Solo incidencias críticas P1 | Horario laboral |
 
 ---

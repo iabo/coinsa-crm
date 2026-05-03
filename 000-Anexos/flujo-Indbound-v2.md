@@ -43,7 +43,8 @@ flowchart TD
     L4 --> L5["Cierre y seguimiento posterior en CRM."]
     L5 --> WLOST([FIN - Oportunidad Perdida])
     L -->|"Sí, confirma"| PAY["Recibe OC del cliente\n+ pago (si venta de contado)."]
-    PAY --> CLT{"¿Cliente existe o es nuevo?"}
+    PAY --> CONF_COT["✅ Confirmar cotización en Odoo.\n(Se convierte en Orden de Venta.)"]
+    CONF_COT --> CLT{"¿Cliente existe o es nuevo?"}
     CLT -->|"Existe"| CR{"¿Tiene crédito?"}
     CLT -->|"Nuevo"| CLT2["Crear cliente en Odoo."]
     CLT2 --> CR
@@ -86,6 +87,7 @@ flowchart TD
     style M_OK fill:#d4edda,color:#155724
     style M_NO fill:#e8d5d5,color:#721c24
     style PAY fill:#cce5ff,color:#004085
+    style CONF_COT fill:#28a745,color:#fff
     style Q fill:#f0c040,color:#000
     style CLT fill:#f0c040,color:#000
     style CLT2 fill:#6a0dad,color:#fff

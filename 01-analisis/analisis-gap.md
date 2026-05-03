@@ -123,6 +123,13 @@ Necesidad del cliente
 - **Complejidad:** Alta
 - **Tipo:** Desarrollo / Integración
 
+### BRECHA-06: Sin seguimiento formal post-entrega
+- **Estado actual:** No existe proceso formal. El vendedor decide discrecionalmente si da seguimiento al cliente tras el envío, y no se registra si el material llegó correctamente ni en qué condición. (Confirmado por Guillermo Vélez, correo 27/02/2026.)
+- **Estado deseado:** Actividad automática de confirmación de recepción asignada al vendedor tras completar la entrega, con registro del resultado en la orden de venta.
+- **Solución Odoo:** Regla de automatización: al validar la orden de entrega (stock.picking), crear actividad de tipo «Llamada de seguimiento» asignada al vendedor responsible, con plazo de 2 días hábiles.
+- **Complejidad:** Baja
+- **Tipo:** Configuración
+
 ---
 
 ## Funcionalidades Standard vs. Customización

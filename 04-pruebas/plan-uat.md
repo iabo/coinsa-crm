@@ -11,24 +11,24 @@
 
 | Rol | Nombre | Área | Escenarios a probar |
 |---|---|---|---|
-| Líder UAT | | | Todos |
-| Key User — Ventas | | Ventas | Pipeline, leads, oportunidades |
-| Key User — Supervisión | | Ventas | Reportes, equipo, asignaciones |
-| Key User — Gerencia | | Dirección | Dashboards, forecast |
-| Key User — Marketing | | Marketing | Leads, campañas |
+| Líder UAT | Guillermo Velez Sabag | Ventas | Todos |
+| Key User — Ventas | Arturo Gil Armenta | Ventas e Ingeniería | Pipeline, leads, oportunidades |
+| Key User — Supervisión | Guillermo Velez Sabag | Coordinación Comercial | Reportes, equipo, asignaciones |
+| Key User — Gerencia | Javier Pablos | Dirección Comercial | Dashboards, forecast |
+| Key User — Marketing | Por confirmar | Marketing | Leads, campañas |
 
 ## Fechas UAT
 
 | Actividad | Fecha | Duración |
 |---|---|---|
-| Preparación del ambiente UAT | | |
-| Carga de datos de prueba | | |
-| Sesión UAT — Ventas | | ~3 horas |
-| Sesión UAT — Supervisores | | ~2 horas |
-| Sesión UAT — Gerencia | | ~1 hora |
-| Corrección de hallazgos | | |
-| Re-prueba de correcciones | | |
-| Sign-off UAT | | |
+| Preparación del ambiente UAT | Por definir | 2 días |
+| Carga de datos de prueba | Por definir | 1 día |
+| Sesión UAT — Ventas | Por definir | ~3 horas |
+| Sesión UAT — Supervisores | Por definir | ~2 horas |
+| Sesión UAT — Gerencia | Por definir | ~1 hora |
+| Corrección de hallazgos | Por definir | 3-5 días |
+| Re-prueba de correcciones | Por definir | 1-2 días |
+| Sign-off UAT | Por definir | 1 hora |
 
 ---
 
@@ -90,7 +90,7 @@
 
 | ID | Severidad | Descripción | Reportado por | Asignado a | Estado | Resolución |
 |---|---|---|---|---|---|---|
-| BUG-001 | | | | | | |
+| BUG-001 | Medio | Registro inicial para documentar hallazgos durante la ejecución del UAT | Líder UAT | Equipo consultor | Abierto | Pendiente |
 
 ---
 
@@ -100,7 +100,7 @@ Al firmar, el usuario confirma que el sistema cumple los requerimientos de negoc
 
 | Área | Key User | Firma | Fecha | Observaciones |
 |---|---|---|---|---|
-| Ventas | | | | |
-| Supervisión Comercial | | | | |
-| Gerencia | | | | |
-| Marketing | | | | |
+| Ventas | Arturo Gil Armenta | Pendiente | Pendiente | Validación de flujo técnico-comercial |
+| Supervisión Comercial | Guillermo Velez Sabag | Pendiente | Pendiente | Validación de pipeline y reportes |
+| Gerencia | Javier Pablos | Pendiente | Pendiente | Validación de visibilidad gerencial |
+| Marketing | Por confirmar | Pendiente | Pendiente | Definir alcance final |

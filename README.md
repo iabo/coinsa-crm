@@ -43,8 +43,7 @@ Implementación del módulo CRM de Odoo para centralizar la gestión de clientes
 
 
 
-# notas para claudio : 
-
+# Sesion de trabajo 1 ::
 - ingeniero pablos comenta de gente que se les da informacion tecnica de platicas que dan sobre PSI, es decir agrupar oportunidades por tipo de equipos y clientes . 
 para contactar y vender despues, seguimiento etcetera
 
@@ -56,7 +55,6 @@ para contactar y vender despues, seguimiento etcetera
  - Campañas de marketing por segmento
  - Programacion de seguimientos y tareas comerciales (por ejemplo cobrar mantenimientos o renovaciones)
  - Generacion de leads a partir de campañas 
- - 
 
 
  - Generar diagrama de swimlanes del proceso actual de ventas con puntos de contacto con Odoo y responsables de cada etapa.
@@ -126,6 +124,9 @@ para contactar y vender despues, seguimiento etcetera
 
 
 S2 >> 
+
+
+Desarrollo del diagrama de flujo del proceso comercial actual (AS-IS) con puntos de contacto con Odoo y responsables de cada etapa.
 
  - Implementar un configuracion predeterminada para el envio de correos por grupos de interes, es decir, que la informacion de facturas solo se envie a ciertos contactos. Asignar por cliente los contactos importantes para envio de correos y los que no son necesarios para el envio de correos automaticos transaccionales. 
 
@@ -249,6 +250,36 @@ Sesion Sabado Posponer :: a Lunes 30 3:30pm - 5:30
 
  
 
+2-apr
+# Notas sesion con MArco :: 
+
+ - Preguntar por lider de equipos de venta y miembros
+ - PReguntar por equipo de Ventas Tecnicas 
+ ## configurar 
+ - Configurar CRM para Etapas
+ - Equipos de ventas 
+ - Actividades 
+ - Etiquetas 
+ - Razon de perdida 
+ - Tipos de Actividad
+ - Recomendado por 
+ - Campaña 
+ - Medio
+ - Origen 
+ - Configuracion de Usuarios 
+ - moneda
+ - Cliente (Reportes)
+ - Productos (Reportes)
+ - 
+
+ - Reportes vacios
+   - fuentes principales
+   - medios principales
+ 
+ Documentar todas las configuraciones custom 
+ - 
+ 
+ -  
 
 
 
@@ -259,8 +290,67 @@ Sesion Sabado Posponer :: a Lunes 30 3:30pm - 5:30
 
 
 
+Sesion de trabajo 6 ::
+Fecha Jueves 9 Abril : 8:00 PM 
+
+Configuracion de Odoo ::
+
+E
+
+Todas las etapas del pipeline deben contener :: 
+ - Actividades siguientes 
+ - Requisitos 
+ - Equipo responsable
+
+- Pipeline de ventas configurado con etapas validadas
+
+- MQL                    (web, correo, WhatsApp) (Expo, Bases de Datos) (investigacion)
+  1. {Lead entrante} 1200  (tener informacion basica de contacto)
+          |
+          |             (haber realizado el primer contacto, 
+          |             haber calificado el lead, etc)
+          |
+          V
+  2. { Contacto realizado} 450 (haber realizado el primer contacto)
+          |
+          |             (haber validado qu)
+          |-> Seguimiento / mantenimiento 
+          |
+          V
+- SQL
+  3. { Diagnostico} (necesidad + presupuesto)  
+          |
+          |
+          |-----> Actividad Siguiente (Dimensionar)
+          |
+          |
+          V
+  4. { Validación técnica }
+          |
+          |-----> Actividad Siguiente (Dimensionar) [Equipo: Arturo]
+          |
+          V
+  5. Cotización enviada 
+          |
+          |-----> Actividad Siguiente (negociación, objeciones, re-cotizar, etc)
+          |
+          V
+  6. Seguimiento ( Negociación, objeciones, etc)
+          |
+          |-> Actividad Siguiente (reunión, llamada, correo de seguimiento, etc)
+          |
+          |->
+          |
+          V
+7. Cierre ganado/perdido
+
+Presentar con Guillermo propuesta de configuracion
 
 
+
+
+En el contacto inicial, se captura o no ? 
+en caso de que si, que se captura ? 
 
 
 

@@ -20,8 +20,11 @@ flowchart TD
     VI3[Elabora cotización en Odoo]
     VI4[Envia cotizacion por correo / Odoo]
     VI5{Motivo de\nno aceptacion?}
-    VI6[Solicita autorizacion\nde descuento]
+    VI6A[Busca mejora de precio:\nproveedor actual o alternativo]
+    VI6B{¿Hay mejora\nde precio?}
+    VI6[Solicita autorización\na Javier Pablos]
     VI7[CRM: marca como\nPostergado o Perdido]
+    VI8[Recibe OC del cliente\n+ pago (si contado)]
   end
 
   subgraph LANE_VC["🏭  VENDEDOR DE CAMPO — Guillermo · Miguel"]
@@ -51,9 +54,13 @@ flowchart TD
   VC1 --> VC2 --> VC3 --> VI3
   VI3 --> VI4
   VI4 --> CL2
-  CL2 -->|Si confirma| BO1
+  CL2 -->|Si confirma| VI8
+  VI8 --> BO1
   CL2 -->|No acepta| VI5
-  VI5 -->|Pide descuento| VI6
+  VI5 -->|Pide descuento| VI6A
+  VI6A --> VI6B
+  VI6B -->|Si| VI3
+  VI6B -->|No| VI6
   VI6 --> CO1 --> VI3
   VI5 -->|Postergado Perdido| VI7
   BO1 -->|No hay stock| BO2 --> BO3 --> BO4
@@ -68,6 +75,9 @@ flowchart TD
   style LANE_BO fill:#f3e5f5,stroke:#9c27b0,color:#000
 
   %% Nodos Odoo
+  style VI6A fill:#cce5ff,color:#004085
+  style VI6B fill:#f0c040,color:#000
+  style VI8 fill:#cce5ff,color:#004085
   style VI1 fill:#6a0dad,color:#fff
   style VI3 fill:#6a0dad,color:#fff
   style VI4 fill:#6a0dad,color:#fff
