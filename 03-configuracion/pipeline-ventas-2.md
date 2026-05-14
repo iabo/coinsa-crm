@@ -1,0 +1,281 @@
+# Configuración del Pipeline de Ventas
+
+## Pipeline Definido — Flujo de Oportunidades
+
+El pipeline de COINSAMATIK consta de 7 etapas, cada una con requisitos y actividades específicas:
+
+---
+
+## MQL y SQL — Marketing y Ventas
+
+Los leads del CRM son materia prima compartida entre dos equipos con roles distintos:
+
+**Marketing (MQL — Marketing Qualified Lead)** alimenta la base de datos con leads captados desde campañas, eventos, formularios web y otras fuentes. Su contribución es esencial aunque limitada en volumen de trabajo dentro del CRM. Los campos de Odoo diseñados para marketing son:
+
+- **Campaña** — a qué campaña pertenece el lead
+- **Medio** — canal por el que llegó (email, web, evento, etc.)
+- **Origen** — fuente específica (Google, formulario, feria, etc.)
+- **Recomendado por** — contacto o empresa que refirió el lead
+
+**Ventas (SQL — Sales Qualified Lead)** toma esos leads, los califica y los procesa a lo largo de las 7 etapas del pipeline hasta el cierre. La mayor parte del trabajo en el CRM ocurre aquí.
+
+La línea divisoria entre MQL y SQL no es una etapa visible en el pipeline — es el momento en que un lead es calificado y se convierte en oportunidad activa bajo responsabilidad de un vendedor.
+
+---
+
+## Etapas del Pipeline
+
+### 1. Nuevo
+**Descripción:** Oportunidad entrante, aún sin vendedor asignado y sin calificar. Se requiere: nombre e informacion de contacto (telefono o email), empresa (si aplica) y medio por el que llegó.
+
+**Origen:** email, WhatsApp, base de datos, referencias
+
+**Requisitos:**
+- Nombre del contacto
+- Información de contacto (teléfono o email)
+- Empresa (si es negocio)
+
+**Actividades siguientes:**
+- [ ] Asignación a vendedor
+- [ ] Contacto inicial (llamada o correo)
+- [ ] Calificación del lead
+
+**Responsable:** Equipo de Coordinación o ventas internas (Hermenegildo, Guillermo, Miguel)
+
+**Tiempo estimado en etapa:** 3-5 días
+
+---
+
+### 2. Contactado
+**Descripción:** Primer contacto realizado, lead calificado con necesidad identificada. Se requiere: descripción de necesidad, presupuesto estimado (si se obtuvo), y confirmación de contacto decisor.
+
+**Requisitos:**
+- Nombre del contacto decisor (si es diferente al contacto inicial)
+- Empresa registrada
+- Necesidad descrita
+- Presupuesto estimado (indicativo)
+
+**Actividades siguientes:**
+- [ ] Reunión técnica (si aplica)
+- [ ] Validación con ingeniería (para proyectos técnicos)
+
+**Responsable:** Vendedor asignado
+
+**Tiempo estimado en etapa:** 1-2 días
+
+---
+
+### 3. Diagnóstico
+**Descripción:** Necesidad identificada y descrita, dependiendo de la complejidad se procede a cotizar o a elaborar propuesta técnica
+
+**Requisitos:**
+- Descripción detallada de necesidad
+- Especificaciones técnicas
+- Presupuesto estimado (rango)
+- Tipo de venta identificado
+
+**Actividades siguientes:**
+- [ ] Dimensionamiento técnico
+- [ ] Elaborar propuesta o cotización
+
+**Responsable:** Vendedor asignado
+
+**Tiempo estimado en etapa:** 2-3 días
+
+---
+
+### 4. Diseño
+**Descripción:** Proyecto técnico en diseño y validación. El equipo técnico elabora la solución, la revisa internamente y la presenta al cliente.
+
+**Requisitos:**
+- Especificaciones técnicas completas
+- Presupuesto base calculado
+- Documentación técnica adjunta
+
+**Actividades siguientes:**
+- [ ] Diseño de solución técnica
+- [ ] Presentación al cliente
+- [ ] Revisión y ajustes
+
+**Responsable:** Equipo técnico (Arturo)
+
+**Tiempo estimado en etapa:** 5-10 días
+
+---
+
+### 5. Cotizado
+**Descripción:** Cotización formal enviada al cliente, en espera de respuesta.
+
+**Requisitos:**
+- Cotización generada en Odoo (con número)
+- Fecha de envío registrada
+- Decisor confirmado
+- Condiciones de pago especificadas
+- Validez de la cotización definida
+
+**Actividades siguientes:**
+- [ ] Esperar respuesta del cliente
+- [ ] A los 10 días sin respuesta → Odoo mueve automáticamente a Seguimiento
+
+**Responsable:** Vendedor
+
+**Tiempo estimado en etapa:** 1-10 días
+
+---
+
+### 6. Seguimiento
+**Descripción:** Negociación activa con el cliente. Se trabaja para cerrar la venta mediante ajustes a la propuesta, negociación de precios y acuerdo de términos y condiciones.
+
+**Requisitos:**
+- Motivo de no aceptación o falta de respuesta registrado
+- Notas de negociación registradas en la oportunidad
+
+**Actividades siguientes:**
+- [ ] Llamada o reunión con el cliente
+- [ ] Reenvío de cotización ajustada (si aplica)
+- [ ] Negociación de precios y términos
+- [ ] Registro de retroalimentación del cliente
+
+**Responsable:** Vendedor
+
+**Tiempo estimado en etapa:** 3-10 días
+
+---
+
+### 7. Cerrado
+**Descripción:** Cliente aceptó la cotización. Se genera la orden de venta.
+
+**Requisitos:**
+- Orden de venta generada desde la oportunidad
+- Condiciones de pago finales registradas
+
+**Actividades siguientes:**
+- [ ] Seguimiento post-entrega (5 días después de entrega)
+
+**Responsable:** Vendedor
+
+---
+
+#### 7a. GANADO
+En Odoo, la etapa Cerrado tiene activado el campo *¿Está en la etapa ganada?* — esto marca la oportunidad como cierre exitoso y actualiza automáticamente los reportes y el forecast del período.
+
+#### 7b. PERDIDO
+Las oportunidades perdidas se gestionan con el botón nativo **Marcar como Perdido** en Odoo. El sistema fuerza la selección de un motivo de pérdida y archiva la oportunidad automáticamente, retirándola del pipeline activo. Sigue siendo reporteable en los dashboards de CRM con el filtro correspondiente.
+
+---
+
+## Configuración Técnica en Odoo
+
+### Campos Obligatorios por Etapa
+
+| Etapa | Cliente | Monto | Vendedor | Descripción | Decisor | Fecha cierre |
+|---|---|---|---|---|---|---|
+| 1. Nuevo | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ |
+| 2. Contactado | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
+| 3. Diagnóstico | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 4. Diseño | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 5. Cotizado | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 6. Seguimiento | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 7. Cerrado | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+### Probabilidades por Etapa
+
+| Etapa | % Probabilidad | Justificación |
+|---|---|---|
+| Nuevo | 10% | No calificado aún |
+| Contactado | 25% | Lead calificado sin propuesta |
+| Diagnóstico | 40% | En análisis técnico |
+| Diseño | 50% | Propuesta en revisión |
+| Cotizado | 70% | Cliente evaluando |
+| Seguimiento | 50% | Negociando ajustes |
+| Ganado | 100% | Cierre confirmado |
+| Perdido | 0% | Sin venta |
+
+---
+
+## Fuentes de Lead
+
+| Fuente | Canal |
+|---|---|
+| Web orgánico | Formulario del sitio web |
+| Referido | Recomendación de cliente existente |
+| Llamada en frío | Prospección activa del vendedor |
+| Email entrante | Correo de interés directo |
+| LinkedIn / Redes sociales | Prospección digital |
+| Evento / Feria | Contacto en evento presencial |
+| Base de datos interna | Minado de clientes existentes o inactivos en Odoo |
+| Plática PSI / Evento técnico | Contacto captado en presentación técnica |
+
+---
+
+## Motivos de Pérdida
+
+| Motivo | Categoría |
+|---|---|
+| Precio fuera de presupuesto | Económico |
+| Presupuesto insuficiente | Económico |
+| Se fue con la competencia | Competencia |
+| No hay presupuesto este año | Timing |
+| El proyecto fue cancelado | Decisión interna |
+| Cambio de prioridades del cliente | Decisión interna |
+| No logramos contactarlo | Sin respuesta |
+| Cliente sin contacto (inactivo) | Sin respuesta |
+| Requerimiento no cubierto | Producto |
+| Especificaciones no ajustan a necesidad | Producto |
+
+---
+
+## Automatizaciones Configuradas 
+
+### AUT-01 — Cotizado sin respuesta → Seguimiento
+- **Modelo:** Lead / Oportunidad
+- **Activador:** Basado en condición de tiempo
+- **Fecha de activación:** Última actualización de etapa
+- **Delay:** 10 días
+- **Aplicar en:** Etapa = Cotizado
+- **Acción:** Actualizar registro → Etapa = Seguimiento
+
+### AUT-02 — Lead inactivo → Notificación al supervisor
+- **Modelo:** Lead / Oportunidad
+- **Activador:** Basado en condición de tiempo
+- **Fecha de activación:** Última actualización de etapa
+- **Delay:** 7 días
+- **Aplicar en:** Etapa = Nuevo o Contactado
+- **Acción:** Crear actividad → Llamada asignada al supervisor
+
+### AUT-03 — Oportunidad sin movimiento → Validación de cierre
+- **Modelo:** Lead / Oportunidad
+- **Activador:** Basado en condición de tiempo
+- **Fecha de activación:** Última actualización de etapa
+- **Delay:** 90 días
+- **Aplicar en:** Todos los registros activos
+- **Acción:** Crear actividad → Tarea asignada al vendedor para validar cierre
+
+### AUT-04 — Post-entrega → Actividad de seguimiento
+- **Modelo:** Transferencia / Entrega (stock.picking)
+- **Activador:** Al actualizar
+- **Aplicar en:** Estado = Hecho
+- **Acción:** Crear actividad → Llamada asignada al vendedor, plazo 2 días hábiles
+
+---
+
+## Validaciones y Controles
+
+- [ ] Al marcar PERDIDO, motivo de pérdida obligatorio
+- [ ] Al generar cotización, cliente debe estar completo
+- [ ] Sincronización automática de monto entre cotización y oportunidad
+- [ ] Historial de cambios de etapa registrado (auditoría)
+
+---
+
+## Actividades de Implementación
+
+- [ ] Crear 7 etapas en Odoo CRM con nombres definidos
+- [ ] Ingresar requisitos por etapa como descripción emergente
+- [ ] Configurar probabilidades por etapa
+- [ ] Crear automatizaciones
+- [ ] Configurar alertas de inactividad
+- [ ] Capacitar a usuarios en el nuevo flujo
+- [ ] Validar con líderes de equipo
+
+
