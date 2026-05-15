@@ -46,9 +46,7 @@ Requieren pequeños ajustes en Configuración de Odoo. Ninguno tarda más de 15 
 
 No bloquean la Ola 1/2, pero necesitan decisiones de configuración o que el sistema ya tenga datos reales.
 
-- [ ] ⏳ **RPT-06** · Visitas a clientes — cumplimiento de programa
-  - Bloqueante: crear tipo de actividad «Visita» en Odoo (CRM → Configuración → Tipos de actividad) y establecer política de registro obligatorio
-  - Reporte disponible una vez haya registros: CRM → Actividades → filtrar por tipo «Visita»
+- [x] ✅ **[RPT-06](#rpt-06)** · Visitas a clientes — cumplimiento de programa
 
 - [ ] ⏳ **RPT-12** · Ventas por tipo de solución (ingeniería)
   - Bloqueante: crear campo selección «Tipo de solución» (venta directa / servicio / integración) en oportunidades de ingeniería
@@ -537,32 +535,83 @@ En el Flujo B se detectó el grupo **«Ninguno» con 42 clientes** sin vendedor 
 ### RPT-16
 **Oportunidades generadas por ingeniería (cross-sell)**
 
-**Estado:** ✅ Implementado (proxy con limitación) — 2026-05-15
+**Estado:** ✅ Implementado — 2026-05-15
 **Usuario objetivo:** Líder de Ingeniería / Coordinador Comercial
 
 **Qué mide:**
-Oportunidades de venta identificadas por el equipo de ingeniería durante su trabajo en campo. Cuando un ingeniero detecta una necesidad adicional del cliente, debería crear una oportunidad en Odoo y pasarla a ventas. Este reporte muestra cuántas de esas oportunidades existen.
+Oportunidades de venta identificadas por el equipo de ingeniería durante su trabajo en campo. Cuando un ingeniero detecta una necesidad adicional del cliente, la registra como actividad **Hand-off a Ventas** en Odoo y la asigna a un vendedor para su seguimiento.
+
+---
+
+**Configuración aplicada — Tipo de actividad “Hand-off a Ventas”**
+
+Crear en: CRM → Configuración → **Tipos de actividad** → Nuevo
+- **Nombre:** `Hand-off a Ventas`
+- **Tipo de acción predeterminado:** Tarea
+- **Ícono:** el disponible (tarea o teléfono)
+
+---
+
+**Flujo de proceso (cómo usa ingeniería este mecanismo):**
+1. Ingeniero está con un cliente y detecta una oportunidad comercial adicional
+2. Abre el contacto o la oportunidad actual en Odoo
+3. Registra actividad tipo **Hand-off a Ventas**
+4. Asigna la actividad a un vendedor específico
+5. Escribe en las notas el contexto: qué necesita el cliente, cuál es la oportunidad
+6. El vendedor recibe la actividad en su bandeja y crea la oportunidad formal
+
+---
+
+**Navegación del reporte:**
+1. Módulo **CRM** (menú principal)
+2. Menú superior → **Reportes** → **Actividades**
+3. **Filtros** → **Hecho** + filtro por tipo de actividad: **Hand-off a Ventas**
+4. **Filtros** → Fecha de vencimiento → **[mes en curso]**
+5. **Agrupar por** → **Asignado a** (para ver quién en ingeniería genera más hand-offs)
+6. **Medidas** → **Número**
+7. **Favoritos** → Guardar → `RPT-16 Hand-offs ingeniería`
+
+**Cómo leer:**
+- Cada grupo = miembro del equipo de ingeniería con su conteo de hand-offs del mes
+- Número alto = ingeniería está activamente identificando negocio para ventas
+- Complementar con RPT-07 Flujo A para ver cuántos hand-offs se convirtieron en oportunidad real
+
+**Cálculo del KPI:**
+`Nº hand-offs realizados por ingeniería / mes`
+Métrica secundaria: `Nº oportunidades creadas a partir de hand-offs / Nº hand-offs totales` (efectividad)
+
+**Ventaja sobre etiquetas:**
+La actividad de Hand-off crea trazabilidad temporal (fecha exacta del hand-off), aparece en la bandeja del vendedor como acción pendiente, y permite medir tanto volumen (ingeniería) como efectividad (ventas) en un solo campo.
+
+---
+
+### RPT-06
+**Visitas a clientes — cumplimiento de programa**
+
+**Estado:** ✅ Implementado — 2026-05-15
+**Usuario objetivo:** Coordinador Comercial / Líer de Ingeniería / Vendedores
+
+**Configuración aplicada:**
+Tipo de actividad **`Visita`** creado en: CRM → Configuración → Tipos de actividad
 
 **Navegación:**
 1. Módulo **CRM** (menú principal)
-2. Menú superior → **Reportes** → **Flujo**
-3. En la barra de búsqueda escribir `INGENIERIA` → seleccionar **Equipo de ventas contiene “INGENIERIA”**
-4. **Agrupar por** → **Vendedor** (para ver quién genera más oportunidades) o **Etapa** (para ver estado del pipeline)
-5. **Medidas** → **Número**
-6. **Favoritos** → Guardar búsqueda actual → nombre `RPT-16 Cross-sell ingeniería` → Guardar
+2. Menú superior → **Reportes** → **Actividades** (botón nativo de Odoo)
+3. **Filtros** → Tipo de actividad: **Visita**
+4. **Filtros** → Fecha de finalización → **[mes en curso]**
+5. **Agrupar por** → **Asignado a** (para ver visitas por vendedor)
+6. Opcionalmente agregar segundo nivel: **Agrupar por** → **Fecha de finalización → Mes**
+7. **Favoritos** → Guardar búsqueda actual → nombre `RPT-06 Visitas por vendedor` → Guardar
 
 **Cómo leer:**
-- Número total de oportunidades del equipo Ingeniería = proxy de actividad de cross-sell
-- Comparar mes a mes: si el número crece, ingeniería está generando más negocio para ventas
+- Cada grupo = vendedor con su conteo de visitas registradas en el período
+- Comparar contra el programa de visitas establecido por el coordinador
+- Vendedor con 0 visitas en el mes = sin visitas registradas (puede ser no capturado o no realizado)
 
-**Observación del staging:** La mayoría de oportunidades aparecen como **“Indefinido”** (sin fecha de cierre definida). Esto indica que el equipo de ingeniería no está asignando fecha de cierre a sus oportunidades — acción correctiva requerida.
+**Cálculo del KPI:**
+`% Cumplimiento = Visitas realizadas (registradas en Odoo) / Visitas programadas × 100`
+El denominador (visitas programadas) debe definirse como meta fija por rol (ej. 8 visitas/mes por vendedor).
 
-**⚠️ Limitación — Sin proceso formal de cross-sell definido**
-Este reporte muestra TODAS las oportunidades del equipo Ingeniería, no solo las que explicitamente son cross-sell pasadas a ventas. No hay forma de distinguir entre:
-- Oportunidades propias de ingeniería (sus propias ventas)
-- Oportunidades generadas para el equipo comercial (cross-sell real)
+**Nota importante:** El reporte empieza a tener datos desde el momento en que el equipo adopte el hábito de registrar visitas con el tipo de actividad **Visita**. No hay datos históricos anteriores a la creación del tipo de actividad.
 
-**Mejora recomendada para producción:**
-1. Crear etiqueta **`CROSS-SELL`** en CRM → Configuración → Etiquetas
-2. Establecer política: cuando ingeniería identifica una oportunidad comercial, la crea en Odoo con esa etiqueta
-3. Filtrar el reporte por esa etiqueta para obtener la métrica real de cross-sell
+**Política de registro recomendada:** Establecer como regla que toda visita a cliente debe registrarse en Odoo antes o después de realizarse. Sin esta política, el reporte mide disciplina CRM, no visitas reales.
