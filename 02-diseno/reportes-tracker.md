@@ -49,23 +49,16 @@ No bloquean la Ola 1/2, pero necesitan decisiones de configuración o que el sis
 - [x] ✅ **[RPT-06](#rpt-06)** · Visitas a clientes — cumplimiento de programa
 
 - [ ] ⏳ **RPT-12** · Ventas por tipo de solución (ingeniería)
-  - Bloqueante: crear campo selección «Tipo de solución» (venta directa / servicio / integración) en oportunidades de ingeniería
-  - Requiere: CRM → Configuración → Campos personalizados (o módulo Studio)
-
-- [ ] ⏳ **RPT-14** · Proyectos entregados en tiempo
-  - Bloqueante: módulo Proyectos activo + campo «Fecha compromiso» como obligatorio al crear proyecto
-  - Reporte: Proyectos → Análisis → comparar Fecha límite vs. Fecha cierre real
+  - Plan: crear campo selección «Tipo de solución» con **Odoo Studio** en formulario de oportunidad
+  - Ver detalle en sección de documentación abajo
 
 - [ ] ⏳ **RPT-19** · Tiempo de entrega de cotización
-  - Ruta: Ventas → Presupuestos → columna «Fecha de envío» – «Fecha de creación»
-  - Bloqueante: requiere que los presupuestos ya se estén registrando con fecha de envío
+  - Campo «Fecha de envío» disponible en Ventas → Presupuestos
+  - Ver detalle en sección de documentación abajo
 
 - [ ] ⏳ **RPT-21** · Pronóstico vs. ventas reales (forecast accuracy)
-  - Bloqueante: necesita al menos 1 mes de datos de pipeline con probabilidades asignadas
-  - Ruta futura: CRM → Ingreso esperado (Σ valor × probabilidad) vs. Ventas → Facturación real
-
-- [ ] ⏳ **RPT-26** · % Proyectos con retraso (DBR)
-  - Mismo prerrequisito que RPT-14: módulo Proyectos + fechas compromiso capturadas
+  - Reporte nativo «Pronóstico» ya existe en CRM → Reportes
+  - Ver condiciones requeridas en sección de documentación abajo
 
 ---
 
@@ -76,9 +69,11 @@ Sin fuente de dato definida ni plataforma asignada. No tocar hasta decidir arqui
 - ⛔ **RPT-03** · Margen de contribución promedio — requiere costos en Odoo por línea/producto
 - ⛔ **RPT-08** · Evaluación cliente externo (NPS) — sin plataforma de encuesta asignada
 - ⛔ **RPT-13** · Margen contribución proyectos — sin costos por proyecto en ERP
+- ⛔ **RPT-14** · Proyectos entregados en tiempo — requiere módulo Proyectos + fechas compromiso
 - ⛔ **RPT-15** · Tasa de garantías — sin proceso de registro (Helpdesk no activo)
 - ⛔ **RPT-22** · Evaluación cliente interno (ventas → ingeniería) — Fase II, sin herramienta
 - ⛔ **RPT-25** · Tiempo respuesta técnica ingeniería → ventas — requiere Helpdesk interno activo
+- ⛔ **RPT-26** · % Proyectos con retraso (DBR) — mismo prerrequisito que RPT-14
 
 ---
 
@@ -615,3 +610,92 @@ El denominador (visitas programadas) debe definirse como meta fija por rol (ej. 
 **Nota importante:** El reporte empieza a tener datos desde el momento en que el equipo adopte el hábito de registrar visitas con el tipo de actividad **Visita**. No hay datos históricos anteriores a la creación del tipo de actividad.
 
 **Política de registro recomendada:** Establecer como regla que toda visita a cliente debe registrarse en Odoo antes o después de realizarse. Sin esta política, el reporte mide disciplina CRM, no visitas reales.
+
+---
+
+### RPT-12
+**Ventas por tipo de solución (ingeniería)**
+
+**Estado:** ⏳ Pendiente configuración con Odoo Studio
+**Usuario objetivo:** Líder de Ingeniería / Dirección
+
+**Plan de implementación:**
+Crear campo personalizado **“Tipo de solución”** en el formulario de oportunidades usando Odoo Studio.
+
+**Pasos de configuración (Studio):**
+1. Activar modo Studio: menú principal → icono de cuadrado punteado (Studio)
+2. Navegar a **CRM → Flujo** → abrir cualquier oportunidad
+3. En modo Studio: **Agregar campo** → tipo **Selección**
+4. Nombre del campo: `Tipo de solución`
+5. Opciones de selección:
+   - `Venta directa`
+   - `Servicio / Asesoría`
+   - `Integración`
+6. Marcar como campo **obligatorio** en oportunidades del equipo Ingeniería
+7. Guardar y salir de Studio
+
+**Navegación del reporte (una vez configurado):**
+1. Módulo **CRM** → **Reportes** → **Flujo**
+2. Filtro: **Equipo de ventas: INGENIERIA** + **Ganado** + **Fecha de cierre → [mes]**
+3. **Agrupar por** → **Tipo de solución** (el nuevo campo)
+4. **Medidas** → **Ingreso esperado**
+5. **Favoritos** → Guardar → `RPT-12 Ventas por tipo solución`
+
+**Cómo leer:**
+Cada barra = ingreso generado por tipo de solución. Permite identificar qué tipo de trabajo genera más valor para ingeniería.
+
+**Nota:** El reporte empieza a tener datos desde que se configure el campo y el equipo lo llene en cada oportunidad.
+
+---
+
+### RPT-19
+**Tiempo de entrega de cotización**
+
+**Estado:** ⏳ Pendiente validación de campo (datos parcialmente disponibles)
+**Usuario objetivo:** Coordinador Comercial / Líder de ventas
+
+**El campo existe en Odoo:** Ventas → Presupuestos registra la **Fecha de pedido** (creación) y cuando se envía la cotización por correo, queda el registro en el chatter con timestamp.
+
+**Navegación:**
+1. Módulo **Ventas** (menú principal)
+2. **Pedidos** → **Presupuestos**
+3. Vista lista → activar columna **Fecha de pedido** (fecha de creación)
+4. Buscar si existe columna **Fecha de envío** en el selector de columnas
+5. Si existe: `Tiempo de entrega = Fecha de envío – Fecha de pedido` por fila
+6. Exportar XLSX para calcular promedio por vendedor/equipo
+
+**Cálculo del KPI:**
+`Días promedio para enviar cotización = (Fecha envío – Fecha creación) promedio por vendedor`
+Meta sugerida: ≤3 días hábiles.
+
+**Pendiente confirmar:** si el campo “Fecha de envío” existe como columna en la vista lista de Presupuestos. Si no existe como campo nativo, el timestamp del chatter (historial de mensajes de la cotización) es la única fuente — no exportable directamente.
+
+---
+
+### RPT-21
+**Pronóstico vs. ventas reales (forecast accuracy)**
+
+**Estado:** ⏳ Reporte nativo disponible — condiciones de calidad pendientes
+**Usuario objetivo:** Dirección / Coordinador Comercial
+
+**Reporte nativo de Odoo:**
+CRM → **Reportes** → **Pronóstico**
+Muestra oportunidades agrupadas por mes de cierre esperado en vista kanban con el ingreso esperado de cada una.
+
+**Cómo leer el reporte nativo:**
+- Cada columna = mes de cierre esperado
+- Cada tarjeta = oportunidad con su ingreso esperado
+- El total de cada columna = ingreso esperado del mes (el pronóstico)
+- Comparar con las ventas reales del mismo mes (de RPT-01) = precisión del forecast
+
+**Cálculo del KPI:**
+`Desviación = |Pronóstico mes X – Ventas reales mes X| / Ventas reales × 100`
+Meta: desviación <15% mensual. Cálculo manual cruzando este reporte con RPT-01.
+
+**Condiciones requeridas para que el pronóstico sea confiable:**
+1. **Toda oportunidad activa debe tener fecha de cierre esperada definida** — las que aparecen en “Ninguno” no se incluyen en ningún mes del forecast
+2. **Probabilidades asignadas por etapa** — en CRM → Configuración → Etapas, cada etapa debe tener % de probabilidad configurado
+3. **Pipeline limpio** — oportunidades sin actividad >30 días deben ser actualizadas o archivadas (usar RPT-18)
+4. **Cierre esperado realista** — no amontonar oportunidades en el mismo mes sin actualizar
+
+**Observación del staging:** Se detectó que la mayoría de oportunidades están en la columna **“Ninguno”** (sin fecha de cierre esperada). Esto hace que el pronóstico actual sea prácticamente inutilizable. Acción correctiva: asignar fecha de cierre esperada a todas las oportunidades activas.
