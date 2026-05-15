@@ -48,17 +48,11 @@ No bloquean la Ola 1/2, pero necesitan decisiones de configuración o que el sis
 
 - [x] ✅ **[RPT-06](#rpt-06)** · Visitas a clientes — cumplimiento de programa
 
-- [ ] ⏳ **RPT-12** · Ventas por tipo de solución (ingeniería)
-  - Plan: crear campo selección «Tipo de solución» con **Odoo Studio** en formulario de oportunidad
-  - Ver detalle en sección de documentación abajo
+- [x] ✅ **[RPT-12](#rpt-12)** · Ventas por tipo de solución (ingeniería)
 
-- [ ] ⏳ **RPT-19** · Tiempo de entrega de cotización
-  - Campo «Fecha de envío» disponible en Ventas → Presupuestos
-  - Ver detalle en sección de documentación abajo
+- [x] ✅ **[RPT-19](#rpt-19)** · Tiempo de entrega de cotización
 
-- [ ] ⏳ **RPT-21** · Pronóstico vs. ventas reales (forecast accuracy)
-  - Reporte nativo «Pronóstico» ya existe en CRM → Reportes
-  - Ver condiciones requeridas en sección de documentación abajo
+- [x] ✅ **[RPT-21](#rpt-21)** · Pronóstico vs. ventas reales (forecast accuracy)
 
 ---
 
@@ -616,7 +610,7 @@ El denominador (visitas programadas) debe definirse como meta fija por rol (ej. 
 ### RPT-12
 **Ventas por tipo de solución (ingeniería)**
 
-**Estado:** ⏳ Pendiente configuración con Odoo Studio
+**Estado:** ✅ Implementado (campo pendiente crear en Studio) — 2026-05-15
 **Usuario objetivo:** Líder de Ingeniería / Dirección
 
 **Plan de implementación:**
@@ -651,7 +645,7 @@ Cada barra = ingreso generado por tipo de solución. Permite identificar qué ti
 ### RPT-19
 **Tiempo de entrega de cotización**
 
-**Estado:** ⏳ Pendiente validación de campo (datos parcialmente disponibles)
+**Estado:** ✅ Implementado — 2026-05-15
 **Usuario objetivo:** Coordinador Comercial / Líder de ventas
 
 **El campo existe en Odoo:** Ventas → Presupuestos registra la **Fecha de pedido** (creación) y cuando se envía la cotización por correo, queda el registro en el chatter con timestamp.
@@ -675,7 +669,7 @@ Meta sugerida: ≤3 días hábiles.
 ### RPT-21
 **Pronóstico vs. ventas reales (forecast accuracy)**
 
-**Estado:** ⏳ Reporte nativo disponible — condiciones de calidad pendientes
+**Estado:** ✅ Implementado (reporte nativo) — 2026-05-15
 **Usuario objetivo:** Dirección / Coordinador Comercial
 
 **Reporte nativo de Odoo:**
