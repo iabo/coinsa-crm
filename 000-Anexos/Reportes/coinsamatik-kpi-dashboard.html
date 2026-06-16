@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KPI Dashboard Comercial — COINSA-MATIK</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  :root {
+    --c-bg: #0a0e1a;
+    --c-surface: #111827;
+    --c-surface2: #1a2235;
+    --c-surface3: #1e2d42;
+    --c-border: rgba(255,255,255,0.07);
+    --c-border2: rgba(255,255,255,0.12);
+    --c-text: #f0f4ff;
+    --c-text-muted: #7a8db0;
+    --c-text-dim: #4a5878;
+    --c-accent: #90b508;
+    --c-accent2: #a2d603;
+    --c-accent3: #5c8b02;
+    --c-blue: #3b82f6;
+    --c-blue-dim: #1e3a5f;
+    --c-green: #22c55e;
+    --c-green-dim: #0f3322;
+    --c-amber: #f59e0b;
+    --c-amber-dim: #3d2800;
+    --c-red: #ef4444;
+    --c-red-dim: #3d0d0d;
+    --c-teal: #14b8a6;
+    --panel-width: 280px;
+    --header-h: 72px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--c-bg);
+    color: var(--c-text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-h);
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border2);
+    display: flex; align-items: center; padding: 0 24px; gap: 20px;
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-logo svg { height: 30px; width: auto; filter: brightness(1.1); }
+  .header-divider { width: 1px; height: 32px; background: var(--c-border2); }
+  .header-title { font-size: 13px; font-weight: 500; color: var(--c-text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+  /* View selector */
+  .view-tabs { display: flex; background: var(--c-bg); border-radius: 8px; padding: 3px; border: 1px solid var(--c-border); }
+  .view-tab { padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--c-text-muted); transition: all 0.2s; border: none; background: none; }
+  .view-tab.active { background: var(--c-surface2); color: var(--c-accent2); }
+
+  /* Role selector */
+  .role-sel { appearance: none; background: var(--c-surface2); border: 1px solid var(--c-border2); color: var(--c-text); border-radius: 8px; padding: 6px 32px 6px 12px; font-family: inherit; font-size: 12px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8db0' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+
+  /* Panel toggle */
+  .panel-toggle-btn { background: var(--c-surface2); border: 1px solid var(--c-border2); color: var(--c-text-muted); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+  .panel-toggle-btn:hover { color: var(--c-text); border-color: var(--c-border2); }
+
+  /* Export btn */
+  .export-btn { background: var(--c-accent3); border: none; color: var(--c-text); border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.2s; }
+  .export-btn:hover { background: var(--c-accent); }
+
+  /* ── LAYOUT ── */
+  .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+  /* ── SIDEBAR PANEL ── */
+  .panel {
+    width: var(--panel-width); min-width: var(--panel-width);
+    background: var(--c-surface); border-right: 1px solid var(--c-border2);
+    position: fixed; top: var(--header-h); bottom: 0; left: 0;
+    overflow-y: auto; padding: 20px 16px;
+    transition: transform 0.3s ease, opacity 0.3s;
+    z-index: 50;
+  }
+  .panel.hidden { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+  .panel-section { margin-bottom: 24px; }
+  .panel-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-text-dim); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--c-border); }
+  .panel-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .panel-row label { font-size: 11px; color: var(--c-text-muted); }
+  .panel-input {
+    background: var(--c-bg); border: 1px solid var(--c-border2); color: var(--c-text);
+    border-radius: 6px; padding: 7px 10px; font-family: 'DM Mono', monospace;
+    font-size: 13px; width: 100%; transition: border-color 0.2s;
+  }
+  .panel-input:focus { outline: none; border-color: var(--c-accent); }
+  .meta-display { background: var(--c-bg); border: 1px solid var(--c-border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+  .meta-display .meta-val { font-size: 22px; font-weight: 600; color: var(--c-accent2); font-family: 'DM Mono', monospace; }
+  .meta-display .meta-lbl { font-size: 10px; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .vendor-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .vendor-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--c-surface3); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--c-accent2); flex-shrink: 0; }
+  .vendor-name { flex: 1; font-size: 12px; }
+  .vendor-input { width: 80px; background: var(--c-bg); border: 1px solid var(--c-border2); color: var(--c-text); border-radius: 5px; padding: 4px 6px; font-family: 'DM Mono', monospace; font-size: 11px; }
+  .apply-btn { background: var(--c-accent3); border: none; color: var(--c-text); border-radius: 6px; padding: 8px 14px; cursor: pointer; font-size: 12px; font-weight: 500; width: 100%; font-family: inherit; transition: background 0.2s; margin-top: 4px; }
+  .apply-btn:hover { background: var(--c-accent); }
+
+  /* CSV Upload */
+  .upload-zone { border: 1.5px dashed var(--c-border2); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--c-accent); background: rgba(144,181,8,0.05); }
+  .upload-zone input { display: none; }
+  .upload-icon { font-size: 24px; margin-bottom: 6px; }
+  .upload-text { font-size: 11px; color: var(--c-text-muted); line-height: 1.5; }
+  .upload-text span { color: var(--c-accent2); font-weight: 500; }
+  .file-badge { background: var(--c-green-dim); border: 1px solid rgba(34,197,94,0.2); border-radius: 6px; padding: 6px 10px; font-size: 11px; color: var(--c-green); display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+
+  /* ── MAIN CONTENT ── */
+  .main { flex: 1; margin-left: var(--panel-width); padding: 24px; transition: margin-left 0.3s; }
+  .main.full { margin-left: 0; }
+
+  /* CSV notice */
+  .csv-notice { background: var(--c-surface2); border: 1px solid var(--c-border2); border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+  .csv-notice .notice-icon { font-size: 28px; }
+  .csv-notice h3 { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .csv-notice p { font-size: 12px; color: var(--c-text-muted); }
+  .csv-notice.success { border-color: rgba(34,197,94,0.3); background: var(--c-green-dim); }
+
+  /* Section header */
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; margin-top: 28px; }
+  .section-header:first-child { margin-top: 0; }
+  .section-badge { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; }
+  .badge-comercial { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .badge-ingenieria { background: rgba(144,181,8,0.15); color: var(--c-accent2); }
+  .badge-critico { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .badge-scope { background: rgba(100,100,100,0.15); color: var(--c-text-dim); }
+  .section-title { font-size: 15px; font-weight: 500; color: var(--c-text); }
+  .section-line { flex: 1; height: 1px; background: var(--c-border); }
+
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 8px; }
+
+  /* KPI Card */
+  .kpi-card {
+    background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 12px;
+    padding: 16px; position: relative; overflow: hidden; transition: border-color 0.2s;
+  }
+  .kpi-card:hover { border-color: var(--c-border2); }
+  .kpi-card.available { border-color: rgba(144,181,8,0.25); }
+  .kpi-card.config { border-color: rgba(59,130,246,0.2); }
+  .kpi-card.pending { border-color: rgba(245,158,11,0.15); }
+  .kpi-card.out-of-scope { opacity: 0.45; }
+  .kpi-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .kpi-code { font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--c-text-dim); letter-spacing: 0.08em; }
+  .kpi-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+  .dot-green { background: var(--c-green); box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+  .dot-blue { background: var(--c-blue); }
+  .dot-amber { background: var(--c-amber); }
+  .dot-gray { background: var(--c-text-dim); }
+  .kpi-name { font-size: 13px; font-weight: 500; color: var(--c-text); margin-bottom: 14px; line-height: 1.4; }
+
+  /* Progress bar */
+  .kpi-progress { margin-bottom: 10px; }
+  .kpi-progress-bar { height: 4px; background: var(--c-surface3); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+  .kpi-progress-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
+  .fill-green { background: linear-gradient(90deg, #15803d, var(--c-green)); }
+  .fill-accent { background: linear-gradient(90deg, var(--c-accent3), var(--c-accent2)); }
+  .fill-blue { background: linear-gradient(90deg, #1d4ed8, var(--c-blue)); }
+  .fill-amber { background: linear-gradient(90deg, #92400e, var(--c-amber)); }
+  .fill-red { background: linear-gradient(90deg, #991b1b, var(--c-red)); }
+  .kpi-nums { display: flex; justify-content: space-between; font-size: 11px; color: var(--c-text-muted); }
+  .kpi-nums .val { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--c-text); }
+  .kpi-nums .pct { color: var(--c-accent2); font-weight: 600; }
+
+  /* Mini pie */
+  .kpi-pie-row { display: flex; align-items: center; gap: 10px; }
+  .kpi-pie-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+  .kpi-pie-canvas { width: 52px !important; height: 52px !important; }
+  .kpi-pie-legend { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .pie-leg-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--c-text-muted; }
+  .pie-leg-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Vendor bar mini */
+  .vendor-mini { display: flex; flex-direction: column; gap: 5px; }
+  .vendor-bar-row { display: flex; align-items: center; gap: 6px; font-size: 10px; }
+  .vendor-bar-name { width: 70px; color: var(--c-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vendor-bar-track { flex: 1; height: 4px; background: var(--c-surface3); border-radius: 2px; overflow: hidden; }
+  .vendor-bar-fill { height: 100%; border-radius: 2px; background: var(--c-accent); }
+  .vendor-bar-val { width: 48px; text-align: right; font-family: 'DM Mono', monospace; color: var(--c-text); }
+
+  /* No data placeholder */
+  .no-data { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; color: var(--c-text-dim); font-size: 11px; text-align: center; gap: 6px; }
+  .no-data-icon { font-size: 22px; opacity: 0.4; }
+
+  /* OOS note */
+  .oos-reason { font-size: 10px; color: var(--c-text-dim); margin-top: 8px; font-style: italic; border-top: 1px solid var(--c-border); padding-top: 8px; }
+
+  /* Summary bar */
+  .summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .sum-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 10px; padding: 14px 16px; }
+  .sum-card-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-text-muted); margin-bottom: 6px; }
+  .sum-card-val { font-size: 26px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--c-text); }
+  .sum-card-sub { font-size: 11px; color: var(--c-text-muted); margin-top: 2px; }
+  .sum-card-pct { font-size: 12px; font-weight: 600; margin-top: 4px; }
+  .pct-good { color: var(--c-green); }
+  .pct-warn { color: var(--c-amber); }
+  .pct-bad { color: var(--c-red); }
+
+  /* Annual progress big bar */
+  .annual-bar-wrap { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
+  .annual-bar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .annual-bar-title { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-text-muted); }
+  .annual-bar-track { height: 12px; background: var(--c-surface3); border-radius: 6px; overflow: hidden; position: relative; }
+  .annual-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--c-accent3), var(--c-accent2)); transition: width 1s ease; }
+  .annual-bar-markers { display: flex; justify-content: space-between; margin-top: 6px; }
+  .annual-marker { font-size: 10px; color: var(--c-text-dim); }
+
+  /* Footer */
+  .footer { margin-top: 48px; padding: 24px 0; border-top: 1px solid var(--c-border); display: flex; align-items: center; justify-content: space-between; }
+  .footer-by { font-size: 11px; color: var(--c-text-dim); }
+  .spm-logo-wrap { display: flex; align-items: center; gap: 10px; }
+  .spm-logo-wrap img { height: 36px; width: auto; filter: brightness(0) invert(1) opacity(0.6); }
+
+  /* Print/export overlay */
+  @media print {
+    .panel, .header .panel-toggle-btn, .header .export-btn, .upload-zone { display: none; }
+    .main { margin-left: 0; }
+    body { background: #fff; color: #111; }
+    .kpi-card { break-inside: avoid; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--c-border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="header-logo">
+    <!-- COINSA-MATIK SVG Logo (condensed inline) -->
+    <svg viewBox="0 0 306 76.7" xmlns="http://www.w3.org/2000/svg">
+      <defs><style>.cl1{fill:#90b508}.cl3{fill:#a2d603}.cl5{fill:#1a1a1a}.cl6{fill:#0d0d0d}.cl7{fill:#82c800}.cl8{fill:#5c8b02}</style></defs>
+      <g>
+        <rect class="cl1" x="2.8" y="31.5" width="13.6" height="13.6" transform="rotate(-45 9.6 38.3)"/>
+        <rect class="cl8" x="12.4" y="21.9" width="13.6" height="13.6" transform="rotate(-45 19.2 28.7)"/>
+        <rect class="cl1" x="22" y="12.3" width="13.6" height="13.6" transform="rotate(-45 28.8 19.1)"/>
+        <rect class="cl1" x="41.2" y="31.5" width="13.6" height="13.6" transform="rotate(-45 48 38.3)"/>
+        <rect class="cl7" x="50.8" y="41.1" width="13.6" height="13.6" transform="rotate(-45 57.6 47.9)"/>
+        <rect class="cl3" x="60.4" y="31.5" width="13.6" height="13.6" transform="rotate(-45 67.2 38.3)"/>
+        <rect class="cl7" x="69.9" y="22" width="13.6" height="13.6" transform="rotate(-45 76.7 28.8)"/>
+        <rect class="cl1" x="79.5" y="12.4" width="13.6" height="13.6" transform="rotate(-45 86.3 19.2)"/>
+        <rect class="cl8" x="89.1" y="22" width="13.6" height="13.6" transform="rotate(-45 95.9 28.8)"/>
+        <rect class="cl1" x="98.7" y="31.6" width="13.6" height="13.6" transform="rotate(-45 105.5 38.4)"/>
+        <rect class="cl5" x="22" y="31.5" width="13.6" height="13.6" transform="rotate(-45 28.8 38.3)"/>
+        <rect class="cl6" x="31.6" y="21.9" width="13.6" height="13.6" transform="rotate(-45 38.4 28.7)"/>
+        <rect class="cl5" x="50.7" y="2.8" width="13.6" height="13.6" transform="rotate(-45 57.5 9.6)"/>
+        <rect class="cl6" x="31.6" y="41.1" width="13.6" height="13.6" transform="rotate(-45 38.4 47.9)"/>
+        <rect class="cl5" x="41.2" y="50.7" width="13.6" height="13.6" transform="rotate(-45 48 57.5)"/>
+        <rect class="cl6" x="50.8" y="60.3" width="13.6" height="13.6" transform="rotate(-45 57.6 67.1)"/>
+        <rect class="cl6" x="60.4" y="50.7" width="13.6" height="13.6" transform="rotate(-45 67.2 57.5)"/>
+        <rect class="cl5" x="70" y="41.1" width="13.6" height="13.6" transform="rotate(-45 76.8 47.9)"/>
+        <rect class="cl5" x="79.5" y="31.6" width="13.6" height="13.6" transform="rotate(-45 86.3 38.4)"/>
+      </g>
+      <g fill="#90b508">
+        <path d="m130.1,51.1c-.3,0-.6,0-.8.2s-.4.3-.6.5-.3.5-.3.8-.1.6-.1,1,0,.9.2,1.3c.1.4.3.6.6.8.3.2.6.3,1,.3s.6,0,.9,0c.3,0,.6-.2,1-.3v1.3c-.3.1-.6.2-.9.3-.3,0-.7,0-1,0-.7,0-1.4-.2-1.8-.5-.5-.3-.8-.7-1.1-1.3-.2-.6-.3-1.2-.3-1.9s0-1,.2-1.5c.1-.5.4-.8.7-1.2s.6-.6,1.1-.8.9-.3,1.4-.3.7,0,1.1.1c.4,0,.7.2,1,.4l-.5,1.2c-.3-.1-.5-.2-.8-.3s-.5-.1-.8-.1Z"/>
+        <path d="m144.5,32.7v2.8c-1.8,1-4,1.5-6.4,1.5s-3.6-.4-5-1.2c-1.4-.8-2.4-1.9-3.2-3.2-.8-1.4-1.2-2.9-1.2-4.5,0-2.5.9-4.7,2.7-6.4,1.8-1.7,4.1-2.6,6.7-2.6s3.9.5,6.1,1.4v2.7c-2-1.2-4-1.8-6-1.8s-3.7.6-5,1.9c-1.3,1.3-2,2.9-2,4.8s.7,3.5,2,4.7c1.3,1.2,3,1.9,5,1.9s4.2-.7,6.2-2Z"/>
+        <path d="m156.1,19c2.7,0,5,.9,6.8,2.6,1.8,1.7,2.7,3.9,2.7,6.4s-.9,4.7-2.7,6.4c-1.8,1.7-4.1,2.5-6.9,2.5s-4.8-.8-6.6-2.5c-1.8-1.7-2.6-3.8-2.6-6.4s.9-4.8,2.7-6.5c1.8-1.7,4-2.6,6.7-2.6Zm.1,2.4c-2,0-3.7.6-4.9,1.9-1.3,1.3-1.9,2.9-1.9,4.8s.6,3.5,1.9,4.7c1.3,1.3,2.9,1.9,4.9,1.9s3.6-.6,4.9-1.9c1.3-1.3,2-2.9,2-4.8s-.7-3.4-2-4.7c-1.3-1.3-2.9-1.9-4.8-1.9Z"/>
+        <path d="m168.7,19.3h2.5v17.5h-2.5v-17.5Z"/>
+        <path d="m189,19.3h2.4v17.5h-2.2l-11.7-13.5v13.5h-2.4v-17.5h2l11.8,13.6v-13.6Z"/>
+        <path d="m199.5,29.4l-1.9-1.2c-1.2-.7-2-1.4-2.6-2.2-.5-.7-.8-1.5-.8-2.4,0-1.4.5-2.5,1.4-3.4,1-.9,2.2-1.3,3.7-1.3s2.8.4,4,1.2v2.8c-1.3-1.2-2.6-1.8-4.1-1.8s-1.5.2-2,.6c-.5.4-.8.9-.8,1.5s.2,1,.6,1.5c.4.5,1,.9,1.9,1.4l1.9,1.1c2.1,1.3,3.2,2.9,3.2,4.9s-.5,2.5-1.4,3.4c-.9.9-2.2,1.3-3.7,1.3s-3.3-.5-4.7-1.6v-3.2c1.4,1.7,2.9,2.6,4.7,2.6s1.4-.2,2-.7c.5-.4.8-1,.8-1.6,0-1.1-.8-2.1-2.3-3Z"/>
+        <path d="m212.5,19.2h1.8l7.9,17.6h-2.6l-2.3-5.2h-7.5l-2.2,5.2h-2.6l7.5-17.6Zm3.7,10.2l-2.8-6.3-2.6,6.3h5.4Z"/>
+        <path d="m246.3,19.3h2.3v17.5h-2.5v-13.6l-5.4,6.8h-.5l-5.4-6.8v13.6h-2.5v-17.5h2.4l5.8,7.2,5.8-7.2Z"/>
+        <path d="m258,19.2h1.8l7.9,17.6h-2.6l-2.3-5.2h-7.5l-2.2,5.2h-2.6l7.5-17.6Zm3.7,10.2l-2.8-6.3-2.6,6.3h5.4Z"/>
+        <path d="m265.4,19.2h14.6v2.2h-6.1v15.3h-2.5v-15.3h-6v-2.2Z"/>
+        <path d="m282.5,19.3h2.5v17.5h-2.5v-17.5Z"/>
+        <path d="m298.8,19.3h3.1l-7.6,8.3,9.5,9.2h-3.4l-9-8.7v8.7h-2.5v-17.5h2.5v8l7.4-8Z"/>
+      </g>
+    </svg>
+  </div>
+  <div class="header-divider"></div>
+  <span class="header-title">KPI Dashboard Comercial</span>
+  <div class="header-right">
+    <div class="view-tabs">
+      <button class="view-tab active" onclick="setView('mensual')">Mensual</button>
+      <button class="view-tab" onclick="setView('trimestral')">Trimestral</button>
+      <button class="view-tab" onclick="setView('anual')">Anual</button>
+    </div>
+    <select class="role-sel" onchange="setRole(this.value)" id="roleSel">
+      <option value="direccion">👁 Dirección General</option>
+      <option value="gerente">📊 Gerente Comercial</option>
+      <option value="vendedor">👤 Vendedor</option>
+    </select>
+    <button class="panel-toggle-btn" onclick="togglePanel()" id="panelBtn">
+      ◀ Configuración
+    </button>
+    <button class="export-btn" onclick="exportReport()">⬇ Exportar PDF</button>
+  </div>
+</header>
+
+<!-- ══ LAYOUT ══ -->
+<div class="layout">
+
+  <!-- ══ PANEL ══ -->
+  <aside class="panel" id="panel">
+
+    <!-- CSV Upload -->
+    <div class="panel-section">
+      <div class="panel-label">Cargar datos Odoo</div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('csvFile').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleDrop(event)">
+        <input type="file" id="csvFile" accept=".csv" multiple onchange="handleFiles(this.files)"/>
+        <div class="upload-icon">📂</div>
+        <div class="upload-text">Arrastra tu CSV de Odoo o <span>haz clic aquí</span><br/>Exporta desde CRM → Reportes → Flujo</div>
+      </div>
+      <div id="fileStatus"></div>
+    </div>
+
+    <!-- Metas -->
+    <div class="panel-section">
+      <div class="panel-label">Meta anual total</div>
+      <div class="meta-display">
+        <div class="meta-lbl">Meta global</div>
+        <div class="meta-val" id="metaDisplay">$6,000,000</div>
+      </div>
+      <div class="panel-row">
+        <label>Meta total anual (USD)</label>
+        <input class="panel-input" type="number" id="metaAnual" value="6000000" step="100000" onchange="updateMetas()"/>
+      </div>
+      <div class="panel-row">
+        <label>Meta mensual (auto)</label>
+        <input class="panel-input" type="number" id="metaMensual" value="500000" readonly style="opacity:0.6;cursor:not-allowed"/>
+      </div>
+      <div class="panel-row">
+        <label>Meta mensual ingeniería (USD)</label>
+        <input class="panel-input" type="number" id="metaIngenieria" value="1000000" onchange="updateMetas()"/>
+      </div>
+    </div>
+
+    <!-- Metas por vendedor -->
+    <div class="panel-section">
+      <div class="panel-label">Meta por vendedor (anual)</div>
+      <div id="vendorMetas">
+        <!-- Se genera dinámicamente -->
+        <div style="font-size:11px;color:var(--c-text-dim);text-align:center;padding:12px 0;">Carga un CSV para ver vendedores</div>
+      </div>
+      <button class="apply-btn" onclick="updateMetas()">✓ Aplicar cambios</button>
+    </div>
+
+    <!-- Visitas meta -->
+    <div class="panel-section">
+      <div class="panel-label">Visitas programadas</div>
+      <div class="panel-row">
+        <label>Visitas/mes por vendedor</label>
+        <input class="panel-input" type="number" id="visitasMeta" value="8" onchange="updateMetas()"/>
+      </div>
+    </div>
+
+    <!-- Cotización meta -->
+    <div class="panel-section">
+      <div class="panel-label">Tiempos objetivo</div>
+      <div class="panel-row">
+        <label>Días máx. entrega cotización</label>
+        <input class="panel-input" type="number" id="cotizDias" value="3" onchange="updateMetas()"/>
+      </div>
+      <div class="panel-row">
+        <label>% conversión objetivo</label>
+        <input class="panel-input" type="number" id="convMeta" value="30" onchange="updateMetas()"/>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="main" id="main">
+
+    <!-- Summary Bar -->
+    <div class="summary-bar" id="summaryBar">
+      <div class="sum-card">
+        <div class="sum-card-lbl">Ventas acumuladas</div>
+        <div class="sum-card-val" id="sumVentas">—</div>
+        <div class="sum-card-sub" id="sumVentasSub">Carga un CSV para ver datos</div>
+        <div class="sum-card-pct" id="sumVentasPct"></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-card-lbl">Pipeline activo</div>
+        <div class="sum-card-val" id="sumPipeline">—</div>
+        <div class="sum-card-sub">Oportunidades abiertas</div>
+        <div class="sum-card-pct" id="sumPipelinePct"></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-card-lbl">Tasa de conversión</div>
+        <div class="sum-card-val" id="sumConv">—</div>
+        <div class="sum-card-sub" id="sumConvSub">Ganadas / Total</div>
+        <div class="sum-card-pct" id="sumConvPct"></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-card-lbl">Facturas en tiempo</div>
+        <div class="sum-card-val" id="sumCobranza">—</div>
+        <div class="sum-card-sub">Cobranza puntual</div>
+        <div class="sum-card-pct" id="sumCobranzaPct"></div>
+      </div>
+    </div>
+
+    <!-- Annual progress -->
+    <div class="annual-bar-wrap">
+      <div class="annual-bar-header">
+        <span class="annual-bar-title">Avance anual vs meta</span>
+        <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--c-text-muted);" id="annualLabel">$0 / $6,000,000</span>
+      </div>
+      <div class="annual-bar-track">
+        <div class="annual-bar-fill" id="annualFill" style="width:0%"></div>
+      </div>
+      <div class="annual-bar-markers">
+        <span class="annual-marker">$0</span>
+        <span class="annual-marker">25%</span>
+        <span class="annual-marker">50%</span>
+        <span class="annual-marker">75%</span>
+        <span class="annual-marker" id="annualMetaLabel">$6M</span>
+      </div>
+    </div>
+
+    <!-- CSV Notice -->
+    <div class="csv-notice" id="csvNotice">
+      <div class="notice-icon">📊</div>
+      <div>
+        <h3>Carga tu exportación de Odoo</h3>
+        <p>Exporta desde CRM → Reportes → Flujo como CSV e importa en el panel izquierdo. Los KPIs se calcularán automáticamente.</p>
+      </div>
+    </div>
+
+    <!-- ── SECCIÓN: Comerciales Coordinadores ── -->
+    <div class="section-header">
+      <span class="section-badge badge-comercial">Comercial</span>
+      <span class="section-title">Coordinadores</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="kpi-grid" id="grid-coord"></div>
+
+    <!-- ── SECCIÓN: Comerciales Vendedores ── -->
+    <div class="section-header" id="sec-vendedores">
+      <span class="section-badge badge-comercial">Comercial</span>
+      <span class="section-title">Vendedores</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="kpi-grid" id="grid-vend"></div>
+
+    <!-- ── SECCIÓN: Ingeniería ── -->
+    <div class="section-header" id="sec-ing">
+      <span class="section-badge badge-ingenieria">Ingeniería</span>
+      <span class="section-title">Ingeniería</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="kpi-grid" id="grid-ing"></div>
+
+    <!-- ── SECCIÓN: KPIs Críticos ── -->
+    <div class="section-header">
+      <span class="section-badge badge-critico">KPIs Críticos</span>
+      <span class="section-title">Pipeline & Eficiencia</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="kpi-grid" id="grid-kpi"></div>
+
+    <!-- ── SECCIÓN: Fuera de scope ── -->
+    <div class="section-header">
+      <span class="section-badge badge-scope">Pendiente</span>
+      <span class="section-title">Fuera de scope — requieren configuración adicional</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="kpi-grid" id="grid-oos"></div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-by">Dashboard generado por SPM Consulting · COINSA-MATIK · <span id="footerDate"></span></div>
+      <div class="spm-logo-wrap">
+        <span style="font-size:11px;color:var(--c-text-dim);">Powered by</span>
+        <img src="spm_logo_transparent_fixed.png" alt="SPM Consulting" onerror="this.style.display='none';document.getElementById('spmFallback').style.display='block'"/>
+        <span id="spmFallback" style="display:none;font-size:14px;font-weight:600;color:var(--c-text-muted);">SPM Consulting</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ══ STATE ══
+const S = {
+  view: 'mensual',
+  role: 'direccion',
+  panelOpen: true,
+  meta: { anual: 6000000, mensual: 500000, ingenieria: 1000000, visitas: 8, cotizDias: 3, convMeta: 30 },
+  data: null,
+  vendedores: [],
+  vendorMetas: {},
+  pieCharts: {}
+};
+
+// ══ FORMAT ══
+const fmt = v => isNaN(v) ? '—' : new Intl.NumberFormat('es-MX', {style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
+const fmtPct = v => isNaN(v) ? '—' : Math.round(v) + '%';
+const fmtN = v => isNaN(v) ? '—' : new Intl.NumberFormat('es-MX').format(Math.round(v));
+
+document.getElementById('footerDate').textContent = new Date().toLocaleDateString('es-MX', {year:'numeric',month:'long',day:'numeric'});
+
+// ══ PANEL TOGGLE ══
+function togglePanel() {
+  S.panelOpen = !S.panelOpen;
+  document.getElementById('panel').classList.toggle('hidden', !S.panelOpen);
+  document.getElementById('main').classList.toggle('full', !S.panelOpen);
+  document.getElementById('panelBtn').textContent = S.panelOpen ? '◀ Configuración' : '▶ Configuración';
+}
+
+// ══ VIEW / ROLE ══
+function setView(v) {
+  S.view = v;
+  document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().startsWith(v.substring(0,4))));
+  renderAll();
+}
+function setRole(r) {
+  S.role = r;
+  const showVend = ['direccion','gerente'].includes(r);
+  const showIng = ['direccion'].includes(r);
+  document.getElementById('sec-vendedores').style.display = showVend ? '' : 'none';
+  document.getElementById('grid-vend').style.display = showVend ? '' : 'none';
+  document.getElementById('sec-ing').style.display = showIng ? '' : 'none';
+  document.getElementById('grid-ing').style.display = showIng ? '' : 'none';
+  renderAll();
+}
+
+// ══ METAS UPDATE ══
+function updateMetas() {
+  S.meta.anual = parseFloat(document.getElementById('metaAnual').value) || 6000000;
+  S.meta.ingenieria = parseFloat(document.getElementById('metaIngenieria').value) || 1000000;
+  S.meta.mensual = S.meta.anual / 12;
+  S.meta.visitas = parseFloat(document.getElementById('visitasMeta').value) || 8;
+  S.meta.cotizDias = parseFloat(document.getElementById('cotizDias').value) || 3;
+  S.meta.convMeta = parseFloat(document.getElementById('convMeta').value) || 30;
+  document.getElementById('metaMensual').value = Math.round(S.meta.mensual);
+  document.getElementById('metaDisplay').textContent = fmt(S.meta.anual);
+  document.getElementById('annualMetaLabel').textContent = fmt(S.meta.anual);
+  // vendor metas
+  document.querySelectorAll('.vendor-input').forEach(inp => {
+    S.vendorMetas[inp.dataset.name] = parseFloat(inp.value) || 0;
+  });
+  renderAll();
+}
+
+// ══ CSV HANDLING ══
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+}
+function handleFiles(files) {
+  if (!files.length) return;
+  const fileStatus = document.getElementById('fileStatus');
+  fileStatus.innerHTML = '';
+  let parsed = [];
+  let remaining = files.length;
+  Array.from(files).forEach(f => {
+    Papa.parse(f, {
+      header: true, skipEmptyLines: true,
+      complete(res) {
+        parsed = parsed.concat(res.data);
+        remaining--;
+        if (remaining === 0) {
+          S.data = parsed;
+          processData();
+          const badge = document.createElement('div');
+          badge.className = 'file-badge';
+          badge.innerHTML = '✓ ' + files.length + ' archivo(s) cargado(s) · ' + parsed.length + ' registros';
+          fileStatus.appendChild(badge);
+          document.getElementById('csvNotice').style.display = 'none';
+        }
+      }
+    });
+  });
+}
+
+// ══ DATA PROCESSING ══
+function processData() {
+  if (!S.data) return;
+  const d = S.data;
+  // detect vendedores
+  const vendSet = new Set();
+  d.forEach(r => {
+    const v = r['Vendedor'] || r['Salesperson'] || r['Usuario'] || r['User'] || '';
+    if (v) vendSet.add(v.trim());
+  });
+  S.vendedores = Array.from(vendSet).sort();
+  // build vendor metas UI
+  if (S.vendedores.length) {
+    const metaPerVend = Math.round(S.meta.anual / Math.max(S.vendedores.length, 1));
+    let html = '';
+    S.vendedores.forEach(v => {
+      const initials = v.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      const current = S.vendorMetas[v] || metaPerVend;
+      if (!S.vendorMetas[v]) S.vendorMetas[v] = current;
+      html += `<div class="vendor-row"><div class="vendor-avatar">${initials}</div><span class="vendor-name">${v.split(' ')[0]}</span><input class="vendor-input" type="number" data-name="${v}" value="${current}" step="10000"/></div>`;
+    });
+    document.getElementById('vendorMetas').innerHTML = html;
+  }
+  renderAll();
+}
+
+// ══ COMPUTED METRICS ══
+function getMetrics() {
+  if (!S.data) return {};
+  const d = S.data;
+  const viewFactor = S.view === 'mensual' ? 1 : S.view === 'trimestral' ? 3 : 12;
+  const metaRef = S.meta.mensual * viewFactor;
+
+  // Filter by won/stage
+  const won = d.filter(r => {
+    const stage = (r['Etapa'] || r['Stage'] || r['Fase'] || '').toLowerCase();
+    const prob = parseFloat(r['Probabilidad'] || r['Probability'] || 0);
+    return stage.includes('gan') || stage.includes('won') || stage.includes('cerrado') || stage.includes('closed') || prob === 100;
+  });
+
+  // Total ventas
+  const totalVentas = won.reduce((s,r) => s + (parseFloat(r['Ingreso esperado'] || r['Expected Revenue'] || r['Revenue'] || r['Importe'] || 0)), 0);
+
+  // Pipeline activo (not won, not lost)
+  const active = d.filter(r => {
+    const stage = (r['Etapa'] || r['Stage'] || '').toLowerCase();
+    return !stage.includes('perdi') || !stage.includes('lost');
+  });
+  const pipelineVal = active.reduce((s,r) => s + (parseFloat(r['Ingreso esperado'] || r['Expected Revenue'] || 0)), 0);
+
+  // Conversion
+  const lost = d.filter(r => {
+    const stage = (r['Etapa'] || r['Stage'] || '').toLowerCase();
+    return stage.includes('perdi') || stage.includes('lost');
+  });
+  const totalClosed = won.length + lost.length;
+  const convRate = totalClosed > 0 ? (won.length / totalClosed * 100) : 0;
+
+  // Ventas por vendedor
+  const vendSales = {};
+  S.vendedores.forEach(v => {
+    vendSales[v] = won.filter(r => (r['Vendedor']||r['Salesperson']||r['Usuario']||'').trim()===v)
+      .reduce((s,r) => s + parseFloat(r['Ingreso esperado']||r['Expected Revenue']||0), 0);
+  });
+
+  // Ingeniería — soporta col. Odoo "Equipo de ventas/Equipo de ventas"
+  const teamOf = r => r['Equipo de ventas'] || r['Equipo de ventas/Equipo de ventas'] || r['Sales Team'] || '';
+  const ingData = won.filter(r => teamOf(r).toUpperCase().includes('INGENI'));
+  const ingVentas = ingData.reduce((s,r) => s + parseFloat(r['Ingreso esperado']||r['Expected Revenue']||0), 0);
+
+  // Actividades — soporta col. Odoo "Actividades/Acción" + convención "VISITA …" en nombre de oportunidad
+  const actType = r => r['Tipo de actividad'] || r['Actividades/Acción'] || r['Activity Type'] || '';
+  const activities = d.filter(r => actType(r));
+  const visitas = d.filter(r => {
+    const at = actType(r).toLowerCase();
+    const stage = (r['Etapa']||r['Stage']||'').toLowerCase();
+    const name = (r['Oportunidad']||r['Opportunity']||r['Name']||'').toUpperCase();
+    return at.includes('visit') || stage === 'visitas' || name.startsWith('VISITA');
+  });
+  const handoffs = d.filter(r => {
+    const at = actType(r).toLowerCase();
+    const name = (r['Oportunidad']||r['Opportunity']||r['Name']||'').toUpperCase();
+    return at.includes('hand') || name.includes('HANDOFF') || name.includes('HAND-OFF');
+  });
+
+  // Cotizaciones perdidas
+  const lostReasons = {};
+  lost.forEach(r => {
+    const reason = r['Motivo de pérdida']||r['Motivo de pérdida/Descripción']||r['Lost Reason']||'Sin motivo';
+    lostReasons[reason] = (lostReasons[reason]||0)+1;
+  });
+
+  // Stages distribution
+  const stages = {};
+  d.forEach(r => {
+    const st = r['Etapa']||r['Stage']||'Desconocido';
+    stages[st] = (stages[st]||0)+1;
+  });
+
+  // Marcas / líneas
+  const brands = {};
+  won.forEach(r => {
+    const b = r['Marca']||r['Etiquetas/Nombre de etiqueta']||r['Categoría']||r['Línea']||r['Category']||r['Product Category']||'Sin categoría';
+    brands[b] = (brands[b]||0) + parseFloat(r['Ingreso esperado']||r['Expected Revenue']||0);
+  });
+
+  // Antigüedad (días desde última actividad)
+  const today = new Date();
+  const stale = d.filter(r => {
+    const d2 = new Date(r['Última actividad']||r['Última acción']||r['Actividades/Fecha de vencimiento']||r['Last Activity']||r['Fecha']||'');
+    if (isNaN(d2)) return false;
+    return (today - d2) / 86400000 > 30;
+  });
+
+  return {
+    totalVentas, metaRef, pipelineVal, convRate, vendSales,
+    ingVentas, visitas, handoffs, lostReasons, stages, brands,
+    staleCount: stale.length, totalOpps: d.length, wonCount: won.length, lostCount: lost.length,
+    activities, totalClosed
+  };
+}
+
+// ══ RENDER ALL ══
+function renderAll() {
+  const m = getMetrics();
+  updateSummary(m);
+  updateAnnualBar(m);
+  renderSection('grid-coord', coordKPIs(m));
+  renderSection('grid-vend', vendKPIs(m));
+  renderSection('grid-ing', ingKPIs(m));
+  renderSection('grid-kpi', criticalKPIs(m));
+  renderSection('grid-oos', oosKPIs());
+}
+
+function updateSummary(m) {
+  if (!S.data) return;
+  document.getElementById('sumVentas').textContent = fmt(m.totalVentas);
+  const vPct = m.metaRef > 0 ? m.totalVentas/m.metaRef*100 : 0;
+  document.getElementById('sumVentasSub').textContent = 'Meta ' + S.view + ': ' + fmt(m.metaRef);
+  document.getElementById('sumVentasPct').textContent = fmtPct(vPct);
+  document.getElementById('sumVentasPct').className = 'sum-card-pct ' + (vPct>=100?'pct-good':vPct>=70?'pct-warn':'pct-bad');
+
+  document.getElementById('sumPipeline').textContent = fmt(m.pipelineVal);
+  const cov = m.metaRef > 0 ? m.pipelineVal/m.metaRef : 0;
+  document.getElementById('sumPipelinePct').textContent = 'Coverage: ' + fmtN(cov) + 'x';
+  document.getElementById('sumPipelinePct').className = 'sum-card-pct ' + (cov>=3?'pct-good':cov>=1.5?'pct-warn':'pct-bad');
+
+  document.getElementById('sumConv').textContent = fmtPct(m.convRate);
+  document.getElementById('sumConvPct').textContent = m.wonCount + ' ganadas / ' + m.totalClosed + ' cerradas';
+  document.getElementById('sumConvPct').className = 'sum-card-pct ' + (m.convRate>=S.meta.convMeta?'pct-good':m.convRate>=15?'pct-warn':'pct-bad');
+
+  document.getElementById('sumCobranza').textContent = '—';
+  document.getElementById('sumCobranzaPct').textContent = 'Requiere módulo Contabilidad';
+}
+
+function updateAnnualBar(m) {
+  const anualVentas = S.data ? m.totalVentas : 0;
+  const pct = Math.min(anualVentas / S.meta.anual * 100, 100);
+  document.getElementById('annualFill').style.width = pct + '%';
+  document.getElementById('annualLabel').textContent = fmt(anualVentas) + ' / ' + fmt(S.meta.anual);
+}
+
+// ══ KPI CARD BUILDER ══
+function buildCard(code, name, status, content, cardClass) {
+  const dotClass = status==='available'?'dot-green':status==='config'?'dot-blue':status==='pending'?'dot-amber':'dot-gray';
+  const cClass = status==='available'?'available':status==='config'?'config':status==='pending'?'pending':'out-of-scope';
+  return `<div class="kpi-card ${cClass} ${cardClass||''}">
+    <div class="kpi-card-top">
+      <span class="kpi-code">${code}</span>
+      <span class="kpi-status-dot ${dotClass}"></span>
+    </div>
+    <div class="kpi-name">${name}</div>
+    ${content}
+  </div>`;
+}
+
+function progressBar(val, meta, fillClass) {
+  const pct = meta>0 ? Math.min(val/meta*100,100) : 0;
+  return `<div class="kpi-progress">
+    <div class="kpi-progress-bar"><div class="kpi-progress-fill ${fillClass||'fill-accent'}" style="width:${pct.toFixed(1)}%"></div></div>
+    <div class="kpi-nums"><span class="val">${fmt(val)}</span><span class="pct">${fmtPct(pct)}</span><span>Meta: ${fmt(meta)}</span></div>
+  </div>`;
+}
+
+function pctBar(val, meta, fillClass, labelVal, labelMeta) {
+  const pct = meta>0 ? Math.min(val/meta*100,100) : 0;
+  return `<div class="kpi-progress">
+    <div class="kpi-progress-bar"><div class="kpi-progress-fill ${fillClass||'fill-blue'}" style="width:${pct.toFixed(1)}%"></div></div>
+    <div class="kpi-nums"><span class="val">${labelVal||fmtPct(val)}</span><span class="pct">${fmtPct(pct)}</span><span>Meta: ${labelMeta||fmtPct(meta)}</span></div>
+  </div>`;
+}
+
+function noDataHtml() {
+  return `<div class="no-data"><div class="no-data-icon">📁</div>Carga CSV para ver datos</div>`;
+}
+
+function miniPieHtml(id, labels, values, colors) {
+  const total = values.reduce((a,b)=>a+b,0);
+  let legend = labels.map((l,i)=>`<div class="pie-leg-item"><div class="pie-leg-dot" style="background:${colors[i]}"></div><span>${l}: ${total>0?Math.round(values[i]/total*100):0}%</span></div>`).join('');
+  return `<div class="kpi-pie-row">
+    <div class="kpi-pie-wrap"><canvas id="${id}" class="kpi-pie-canvas" width="52" height="52" role="img" aria-label="Mini pie chart"></canvas></div>
+    <div class="kpi-pie-legend">${legend}</div>
+  </div>`;
+}
+
+function vendorBarsHtml(vendSales, metaRef) {
+  if (!vendSales || !Object.keys(vendSales).length) return noDataHtml();
+  const sorted = Object.entries(vendSales).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const max = sorted[0]?.[1] || 1;
+  return `<div class="vendor-mini">${sorted.map(([n,v])=>`
+    <div class="vendor-bar-row">
+      <span class="vendor-bar-name">${n.split(' ')[0]}</span>
+      <div class="vendor-bar-track"><div class="vendor-bar-fill" style="width:${Math.round(v/max*100)}%"></div></div>
+      <span class="vendor-bar-val">${fmt(v)}</span>
+    </div>`).join('')}</div>`;
+}
+
+// ══ SECTIONS ══
+function coordKPIs(m) {
+  const hasData = !!S.data;
+  const metaRef = S.meta.mensual * (S.view==='mensual'?1:S.view==='trimestral'?3:12);
+  return [
+    buildCard('RPT-01','Ventas totales del equipo vs. meta','available',
+      hasData ? progressBar(m.totalVentas, metaRef, 'fill-accent') : noDataHtml()),
+    buildCard('RPT-02','Ventas por marca / línea de producto','available',
+      hasData && Object.keys(m.brands).length ? miniPieHtml('pie-rpt02', Object.keys(m.brands).slice(0,4), Object.values(m.brands).slice(0,4), ['#90b508','#3b82f6','#f59e0b','#ef4444']) : noDataHtml()),
+    buildCard('RPT-03','Margen de contribución promedio','out-of-scope',
+      `<div class="oos-reason">⛔ Requiere costos por línea/producto en Odoo</div>`),
+    buildCard('RPT-04','Cobranza — facturas cobradas en tiempo','available',
+      `<div class="no-data"><div class="no-data-icon">🏦</div>Exportar desde Contabilidad → Cuenta por cobrar</div>`),
+    buildCard('RPT-05','Tasa de conversión del embudo','available',
+      hasData ? pctBar(m.convRate, S.meta.convMeta, 'fill-blue', fmtPct(m.convRate), fmtPct(S.meta.convMeta)) : noDataHtml()),
+    buildCard('RPT-06','Visitas a clientes — cumplimiento','available',
+      hasData ? pctBar(m.visitas.length, S.meta.visitas * Math.max(S.vendedores.length,1), 'fill-green', fmtN(m.visitas.length)+' visitas', fmtN(S.meta.visitas * Math.max(S.vendedores.length,1))) : noDataHtml()),
+    buildCard('RPT-07','Nuevas oportunidades (clientes nuevos)','available',
+      hasData ? `<div class="kpi-nums" style="margin-top:4px"><span class="val" style="font-size:28px">${fmtN(m.totalOpps)}</span><span style="color:var(--c-text-muted)">oportunidades totales</span></div>` : noDataHtml()),
+    buildCard('RPT-08','Evaluación cliente externo (NPS)','out-of-scope',
+      `<div class="oos-reason">⛔ Sin plataforma de encuesta asignada</div>`),
+  ];
+}
+
+function vendKPIs(m) {
+  const hasData = !!S.data;
+  const metaRef = S.meta.mensual * (S.view==='mensual'?1:S.view==='trimestral'?3:12);
+  return [
+    buildCard('RPT-09','Ventas individuales por vendedor vs. meta','available',
+      hasData ? vendorBarsHtml(m.vendSales, metaRef) : noDataHtml()),
+    buildCard('RPT-10','Ventas por marca (por vendedor)','available',
+      hasData ? miniPieHtml('pie-rpt10', Object.keys(m.brands).slice(0,4), Object.values(m.brands).slice(0,4), ['#82c800','#3b82f6','#f59e0b','#14b8a6']) : noDataHtml()),
+    buildCard('RPT-04b','Cobranza filtrada por vendedor','available',
+      `<div class="no-data"><div class="no-data-icon">🏦</div>Requiere exportación de Contabilidad</div>`),
+    buildCard('RPT-06b','Visitas por vendedor','available',
+      hasData ? pctBar(m.visitas.length, S.meta.visitas * Math.max(S.vendedores.length,1), 'fill-green', fmtN(m.visitas.length), fmtN(S.meta.visitas*Math.max(S.vendedores.length,1))) : noDataHtml()),
+  ];
+}
+
+function ingKPIs(m) {
+  const hasData = !!S.data;
+  const ingMeta = S.meta.ingenieria / 12 * (S.view==='mensual'?1:S.view==='trimestral'?3:12);
+  return [
+    buildCard('RPT-11','Ventas totales — Ingeniería','available',
+      hasData ? progressBar(m.ingVentas, ingMeta, 'fill-accent') : noDataHtml()),
+    buildCard('RPT-12','Ventas por tipo de solución','config',
+      `<div class="no-data"><div class="no-data-icon">⚙️</div>Requiere campo "Tipo de solución" en Odoo Studio</div>`),
+    buildCard('RPT-13','Margen de contribución proyectos','out-of-scope',
+      `<div class="oos-reason">⛔ Sin costos por proyecto en ERP</div>`),
+    buildCard('RPT-14','Proyectos entregados en tiempo','out-of-scope',
+      `<div class="oos-reason">⛔ Requiere módulo Proyectos + fechas compromiso</div>`),
+    buildCard('RPT-15','Tasa de garantías y reclamaciones','out-of-scope',
+      `<div class="oos-reason">⛔ Sin proceso de registro (Helpdesk no activo)</div>`),
+    buildCard('RPT-16','Oportunidades generadas por ingeniería','available',
+      hasData ? `<div class="kpi-nums" style="margin-top:4px"><span class="val" style="font-size:28px">${fmtN(m.handoffs.length)}</span><span style="color:var(--c-text-muted)">Hand-offs a Ventas</span></div>` : noDataHtml()),
+    buildCard('RPT-22','Evaluación cliente interno (ventas → ing.)','out-of-scope',
+      `<div class="oos-reason">⛔ Fase II — sin herramienta definida</div>`),
+  ];
+}
+
+function criticalKPIs(m) {
+  const hasData = !!S.data;
+  const lostArr = Object.entries(m.lostReasons||{}).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const stageArr = Object.entries(m.stages||{}).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const stageColors = ['#90b508','#3b82f6','#f59e0b','#ef4444'];
+
+  return [
+    buildCard('RPT-17','Tiempo de vida promedio de oportunidad','available',
+      `<div class="no-data"><div class="no-data-icon">⏱</div>Usa "Días para el cierre" en CRM → Flujo → Análisis</div>`),
+    buildCard('RPT-18','Antigüedad de oportunidades sin actividad','available',
+      hasData ? `<div class="kpi-nums" style="margin-top:4px"><span class="val" style="font-size:28px;color:${m.staleCount>10?'var(--c-red)':'var(--c-amber)'}">${fmtN(m.staleCount)}</span><span style="color:var(--c-text-muted)">opps sin actividad +30 días</span></div>` : noDataHtml()),
+    buildCard('RPT-19','Tiempo de entrega de cotización','available',
+      `<div class="no-data"><div class="no-data-icon">📋</div>Exportar desde Ventas → Presupuestos</div>`),
+    buildCard('RPT-05b','Tasa de conversión por etapa','available',
+      hasData && stageArr.length ? miniPieHtml('pie-stages', stageArr.map(x=>x[0].substring(0,12)), stageArr.map(x=>x[1]), stageColors) : noDataHtml()),
+    buildCard('RPT-20','Valor del pipeline activo (coverage)','available',
+      hasData ? (() => {
+        const cov = S.meta.mensual > 0 ? m.pipelineVal / S.meta.mensual : 0;
+        return `<div style="margin-top:4px">
+          <div class="kpi-nums"><span class="val" style="font-size:20px">${fmt(m.pipelineVal)}</span><span class="pct">${cov.toFixed(1)}x cobertura</span></div>
+          <div class="kpi-progress" style="margin-top:8px"><div class="kpi-progress-bar"><div class="kpi-progress-fill fill-blue" style="width:${Math.min(cov/5*100,100).toFixed(1)}%"></div></div></div>
+        </div>`;
+      })() : noDataHtml()),
+    buildCard('RPT-23','Actividades de CRM por vendedor','available',
+      hasData ? `<div class="kpi-nums" style="margin-top:4px"><span class="val" style="font-size:28px">${fmtN(m.activities.length)}</span><span style="color:var(--c-text-muted)">actividades registradas</span></div>` : noDataHtml()),
+    buildCard('RPT-24','Cotizaciones perdidas y motivo','available',
+      hasData && lostArr.length ? miniPieHtml('pie-lost', lostArr.map(x=>x[0].substring(0,14)), lostArr.map(x=>x[1]), ['#ef4444','#f59e0b','#7a8db0']) : noDataHtml()),
+    buildCard('RPT-25','Tiempo de respuesta técnica ingeniería','out-of-scope',
+      `<div class="oos-reason">⛔ Requiere Helpdesk interno activo</div>`),
+    buildCard('RPT-21','Pronóstico vs. ventas reales','available',
+      hasData ? progressBar(m.totalVentas, S.meta.mensual*(S.view==='mensual'?1:S.view==='trimestral'?3:12), 'fill-green') : noDataHtml()),
+    buildCard('RPT-26','% Proyectos ingeniería con retraso (DBR)','out-of-scope',
+      `<div class="oos-reason">⛔ Requiere módulo Proyectos + fechas compromiso</div>`),
+  ];
+}
+
+function oosKPIs() {
+  return [
+    buildCard('RPT-03','Margen de contribución promedio','out-of-scope',`<div class="oos-reason">Requiere costos en Odoo por línea/producto</div>`),
+    buildCard('RPT-08','Evaluación cliente externo (NPS)','out-of-scope',`<div class="oos-reason">Sin plataforma de encuesta asignada</div>`),
+    buildCard('RPT-13','Margen contribución proyectos','out-of-scope',`<div class="oos-reason">Sin costos por proyecto en ERP</div>`),
+    buildCard('RPT-14','Proyectos entregados en tiempo','out-of-scope',`<div class="oos-reason">Requiere módulo Proyectos + fechas compromiso</div>`),
+    buildCard('RPT-15','Tasa de garantías y reclamaciones','out-of-scope',`<div class="oos-reason">Sin proceso de registro (Helpdesk no activo)</div>`),
+    buildCard('RPT-22','Evaluación cliente interno (ventas → ing.)','out-of-scope',`<div class="oos-reason">Fase II, sin herramienta</div>`),
+    buildCard('RPT-25','Tiempo respuesta técnica ingeniería','out-of-scope',`<div class="oos-reason">Requiere Helpdesk interno activo</div>`),
+    buildCard('RPT-26','% Proyectos con retraso (DBR)','out-of-scope',`<div class="oos-reason">Mismo prerrequisito que RPT-14</div>`),
+  ];
+}
+
+// ══ RENDER SECTION ══
+function renderSection(gridId, cards) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = cards.join('');
+  // init pie charts
+  grid.querySelectorAll('canvas').forEach(canvas => {
+    const id = canvas.id;
+    if (S.pieCharts[id]) { S.pieCharts[id].destroy(); }
+    // get data from legend
+    const wrap = canvas.closest('.kpi-pie-row');
+    if (!wrap) return;
+    const dots = wrap.querySelectorAll('.pie-leg-dot');
+    const labels = wrap.querySelectorAll('.pie-leg-item span');
+    const colors = Array.from(dots).map(d => d.style.background);
+    const vals = Array.from(labels).map(l => {
+      const m = l.textContent.match(/(\d+)%/);
+      return m ? parseInt(m[1]) : 0;
+    });
+    if (vals.every(v=>v===0)) return;
+    try {
+      S.pieCharts[id] = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: { datasets: [{ data: vals, backgroundColor: colors, borderWidth: 0, hoverOffset: 2 }] },
+        options: {
+          responsive: false, cutout: '60%',
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          animation: { duration: 600 }
+        }
+      });
+    } catch(e) {}
+  });
+}
+
+// ══ EXPORT ══
+function exportReport() {
+  window.print();
+}
+
+// ══ INIT ══
+document.getElementById('metaMensual').value = Math.round(6000000/12);
+renderAll();
+</script>
+</body>
+</html>

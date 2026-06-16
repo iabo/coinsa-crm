@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracker de Reportes · COINSA-MATIK</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Literata:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0d;
+    --paper: #f5f2ec;
+    --accent: #c8372d;
+    --accent2: #1a4d8f;
+    --accent3: #e8a020;
+    --muted: #6b6560;
+    --rule: #d4cfc8;
+    --green: #1d6b3a;
+    --green-light: #e8f5ee;
+    --red-light: #fdf0ef;
+    --yellow-light: #fef9ec;
+    --blue-light: #eef3fb;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--paper); color:var(--ink); font-family:'Literata',Georgia,serif; font-size:14px; line-height:1.65; }
+
+  /* ── COVER ── */
+  .cover { background:var(--ink); color:var(--paper); padding:72px 64px 60px; position:relative; overflow:hidden; }
+  .cover::before { content:''; position:absolute; top:-80px; right:-80px; width:420px; height:420px; border-radius:50%; border:2px solid rgba(200,55,45,0.35); }
+  .cover::after  { content:''; position:absolute; bottom:-100px; left:180px; width:280px; height:280px; border-radius:50%; border:1px solid rgba(200,55,45,0.2); }
+  .cover-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:24px; }
+  .cover h1 { font-family:'Syne',sans-serif; font-size:52px; font-weight:800; line-height:1.05; margin-bottom:20px; max-width:700px; }
+  .cover h1 span { color:var(--accent); }
+  .cover-sub { font-size:16px; color:rgba(245,242,236,0.65); max-width:560px; margin-bottom:32px; font-style:italic; }
+  .legend { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:36px; }
+  .legend-item { display:flex; align-items:center; gap:8px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; color:rgba(245,242,236,0.65); }
+  .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .ld-green  { background:#4caf7d; }
+  .ld-yellow { background:var(--accent3); }
+  .ld-blue   { background:#6b9ed2; }
+  .ld-red    { background:var(--accent); }
+  .cover-meta { display:flex; gap:48px; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.12); padding-top:28px; }
+  .cover-meta-item { display:flex; flex-direction:column; gap:4px; }
+  .cover-meta-item .clabel { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); }
+  .cover-meta-item .cval   { font-family:'Syne',sans-serif; font-size:14px; font-weight:600; color:var(--paper); }
+
+  /* ── LAYOUT ── */
+  .main { max-width:1180px; margin:0 auto; padding:0 48px 80px; }
+
+  /* ── SECTION HEADER ── */
+  .section-header { display:flex; align-items:center; gap:20px; border-top:3px solid var(--ink); padding-top:20px; margin:64px 0 32px; }
+  .section-num   { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; color:var(--accent); white-space:nowrap; }
+  .section-title { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1.1; }
+  .section-desc  { color:var(--muted); font-size:13px; margin-bottom:28px; font-style:italic; max-width:720px; }
+
+  /* ── OLA LABELS ── */
+  .ola-header { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+  .ola-badge { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:2px; font-weight:500; }
+  .ob-1     { background:var(--green-light); color:var(--green); border:1px solid #b8dfc9; }
+  .ob-2     { background:var(--yellow-light); color:#8a5a00; border:1px solid #f0d89a; }
+  .ob-3     { background:var(--blue-light); color:var(--accent2); border:1px solid #b8cfe8; }
+  .ob-scope { background:var(--red-light); color:var(--accent); border:1px solid #f2c4c1; }
+  .ola-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
+  .ola-desc  { font-size:12.5px; color:var(--muted); font-style:italic; margin-bottom:18px; }
+
+  /* ── OVERVIEW GRID ── */
+  .rpt-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:10px; margin-bottom:44px; }
+  .rpt-card { border:1px solid var(--rule); border-radius:4px; overflow:hidden; transition:box-shadow 0.15s,border-color 0.15s; }
+  .rpt-card:hover { border-color:var(--ink); box-shadow:2px 2px 0 var(--ink); }
+  .rpt-card a { display:flex; align-items:stretch; width:100%; text-decoration:none; color:inherit; }
+  .rpt-card-bar { width:4px; flex-shrink:0; }
+  .bar-green  { background:var(--green); }
+  .bar-yellow { background:var(--accent3); }
+  .bar-blue   { background:var(--accent2); }
+  .rpt-card-body { padding:12px 14px; flex:1; }
+  .rpt-card-id   { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:4px; }
+  .rpt-card-name { font-family:'Syne',sans-serif; font-size:12.5px; font-weight:700; line-height:1.3; margin-bottom:6px; }
+  .rpt-card-user { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); }
+
+  /* ── SCOPE LIST ── */
+  .scope-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:10px; margin-bottom:48px; }
+  .scope-item { display:flex; align-items:flex-start; gap:12px; padding:12px 16px; border:1px solid var(--rule); border-left:4px solid rgba(200,55,45,0.5); border-radius:4px; background:rgba(200,55,45,0.03); }
+  .scope-id     { font-family:'DM Mono',monospace; font-size:11px; font-weight:700; color:var(--accent); min-width:56px; padding-top:1px; }
+  .scope-name   { font-family:'Syne',sans-serif; font-size:12.5px; font-weight:700; }
+  .scope-reason { color:var(--muted); font-size:11.5px; font-style:italic; margin-top:2px; }
+
+  /* ── RPT DETAIL ── */
+  .rpt-detail { margin-bottom:56px; border:1px solid var(--rule); border-radius:4px; overflow:hidden; scroll-margin-top:24px; }
+  .rpt-head { background:var(--ink); color:var(--paper); padding:20px 24px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; }
+  .rpt-head-id    { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:6px; }
+  .rpt-head-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; line-height:1.15; max-width:600px; }
+  .rpt-head-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
+  .rpt-date       { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; color:rgba(245,242,236,0.4); }
+
+  /* ── PILLS ── */
+  .pill         { display:inline-block; padding:2px 10px; border-radius:2px; font-family:'DM Mono',monospace; font-size:10px; font-weight:500; white-space:nowrap; }
+  .pill-yes     { background:var(--green-light); color:var(--green); border:1px solid #b8dfc9; }
+  .pill-partial { background:var(--yellow-light); color:#8a5a00; border:1px solid #f0d89a; }
+  .pill-info    { background:var(--blue-light); color:var(--accent2); border:1px solid #b8cfe8; }
+
+  /* ── USER ROW ── */
+  .user-row { padding:10px 24px; border-bottom:1px solid var(--rule); background:rgba(0,0,0,0.02); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .user-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+  .ubadge   { display:inline-flex; align-items:center; gap:7px; font-family:'Syne',sans-serif; font-size:11px; font-weight:700; padding:4px 12px 4px 5px; border-radius:2px; }
+  .ub-dark  { background:var(--ink); color:var(--paper); }
+  .ub-blue  { background:var(--accent2); color:var(--paper); }
+  .ub-amber { background:#4a3010; color:var(--paper); }
+  .ubadge .dot { width:18px; height:18px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:800; }
+  .ub-blue .dot { background:var(--accent3); }
+
+  /* ── DETAIL SECTIONS ── */
+  .ds { padding:20px 24px; border-bottom:1px solid var(--rule); }
+  .ds:last-child { border-bottom:none; }
+  .ds-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:12px; }
+
+  /* ── NAV STEPS ── */
+  .steps { list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .step  { display:flex; align-items:flex-start; gap:12px; font-size:13px; line-height:1.55; }
+  .step-n { width:22px; height:22px; border-radius:50%; background:var(--ink); color:var(--paper); font-family:'DM Mono',monospace; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+  .step strong { font-family:'Syne',sans-serif; font-weight:700; }
+
+  /* ── KPI FORMULA ── */
+  .kpi-box { background:var(--ink); color:var(--paper); padding:14px 18px; border-radius:4px; font-family:'DM Mono',monospace; font-size:12px; line-height:1.6; margin-top:4px; }
+  .kpi-box .kl { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:8px; }
+  .kpi-box .km { color:rgba(245,242,236,0.5); font-size:10.5px; margin-top:6px; }
+
+  /* ── CALLOUTS ── */
+  .callout       { border-radius:0 4px 4px 0; padding:12px 16px; font-size:12.5px; line-height:1.6; margin-top:12px; }
+  .callout + .callout { margin-top:8px; }
+  .co-warn   { border-left:3px solid var(--accent3); background:var(--yellow-light); color:#5a3c00; }
+  .co-info   { border-left:3px solid var(--accent2); background:var(--blue-light); color:#0d2d5a; }
+  .co-action { border-left:3px solid var(--green); background:var(--green-light); color:#0f4025; }
+  .co-danger { border-left:3px solid var(--accent); background:var(--red-light); color:#6a1a15; }
+  .ctitle { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.5px; display:block; margin-bottom:5px; }
+
+  /* ── DATA LIST ── */
+  .dl { list-style:none; }
+  .dl li { font-size:12.5px; line-height:1.6; padding:2px 0 2px 16px; position:relative; }
+  .dl li::before { content:'—'; position:absolute; left:0; color:var(--muted); font-size:11px; }
+
+  /* ── EXAMPLE BOX ── */
+  .eg-box { background:rgba(0,0,0,0.03); border:1px solid var(--rule); border-radius:4px; padding:12px 16px; font-size:12px; font-family:'DM Mono',monospace; line-height:1.7; margin-top:14px; }
+  .eg-box .el { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8px; }
+
+  /* ── INLINE CODE ── */
+  code { background:rgba(0,0,0,0.07); padding:1px 6px; border-radius:2px; font-family:'DM Mono',monospace; font-size:11.5px; }
+
+  p { margin-bottom:8px; }
+  p:last-child { margin-bottom:0; }
+
+  /* ── FOOTER ── */
+  footer { background:var(--ink); color:rgba(245,242,236,0.4); padding:24px 64px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  footer span { color:var(--accent); }
+
+  @media print {
+    .cover { padding:48px 40px 40px; }
+    .main  { padding:0 32px 48px; }
+    .rpt-grid { grid-template-columns:repeat(3,1fr); }
+    .scope-list { grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ COVER ═══════════ -->
+<div class="cover">
+  <div class="cover-label">Documentación Técnica · Implementación Odoo CRM</div>
+  <h1>Tracker de<br><span>Reportes</span><br>COINSA-MATIK</h1>
+  <p class="cover-sub">Estado de implementación, instrucciones de navegación paso a paso y detalle técnico de cada reporte configurado en Odoo CRM.</p>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot ld-green"></div>Ola 1 — Listo (solo navegar)</div>
+    <div class="legend-item"><div class="legend-dot ld-yellow"></div>Ola 2 — Config rápida (5–15 min)</div>
+    <div class="legend-item"><div class="legend-dot ld-blue"></div>Ola 3 — Setup mayor / datos previos</div>
+    <div class="legend-item"><div class="legend-dot ld-red"></div>Fuera de scope</div>
+  </div>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><span class="clabel">Empresa</span><span class="cval">COINSA-MATIK</span></div>
+    <div class="cover-meta-item"><span class="clabel">Sistema base</span><span class="cval">Odoo CRM</span></div>
+    <div class="cover-meta-item"><span class="clabel">Reportes implementados</span><span class="cval">17 activos · 8 fuera de scope</span></div>
+    <div class="cover-meta-item"><span class="clabel">Última actualización</span><span class="cval">2026-05-15</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════════════════════════════════
+     01 — RESUMEN POR OLA
+════════════════════════════════════════ -->
+<div class="section-header">
+  <span class="section-num">01</span>
+  <h2 class="section-title">Resumen por Ola de Implementación</h2>
+</div>
+<p class="section-desc">Vista rápida de todos los reportes agrupados por ola. Haz clic en cualquier tarjeta para ir al detalle técnico.</p>
+
+<!-- OLA 1 -->
+<div class="ola-header">
+  <span class="ola-badge ob-1">Ola 1</span>
+  <span class="ola-title">Implementar hoy — sin configuración</span>
+</div>
+<p class="ola-desc">Existen en Odoo ahora mismo. Solo hay que navegar y guardar el favorito/filtro.</p>
+<div class="rpt-grid">
+
+  <div class="rpt-card"><a href="#rpt-01">
+    <div class="rpt-card-bar bar-green"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-01</span>
+      <div class="rpt-card-name">Ventas totales del equipo vs. meta</div>
+      <div class="rpt-card-user">Coordinador Comercial</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-04">
+    <div class="rpt-card-bar bar-green"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-04</span>
+      <div class="rpt-card-name">Cobranza — facturas cobradas en tiempo</div>
+      <div class="rpt-card-user">Coordinador · Administración</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-09">
+    <div class="rpt-card-bar bar-green"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-09</span>
+      <div class="rpt-card-name">Ventas individuales por vendedor vs. meta</div>
+      <div class="rpt-card-user">Vendedor · Coordinador</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-11">
+    <div class="rpt-card-bar bar-green"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-11</span>
+      <div class="rpt-card-name">Ventas totales (ingeniería)</div>
+      <div class="rpt-card-user">Líder Ingeniería · Dirección</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-20">
+    <div class="rpt-card-bar bar-green"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-20</span>
+      <div class="rpt-card-name">Valor del pipeline activo (coverage)</div>
+      <div class="rpt-card-user">Coordinador · Dirección</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-23">
+    <div class="rpt-card-bar bar-green"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-23</span>
+      <div class="rpt-card-name">Actividades CRM completadas por vendedor</div>
+      <div class="rpt-card-user">Coordinador · Líder ventas</div>
+    </div>
+  </a></div>
+
+</div>
+
+<!-- OLA 2 -->
+<div class="ola-header">
+  <span class="ola-badge ob-2">Ola 2</span>
+  <span class="ola-title">Config rápida — hoy o mañana</span>
+</div>
+<p class="ola-desc">Requieren pequeños ajustes en Configuración de Odoo. Ninguno tarda más de 15 min.</p>
+<div class="rpt-grid">
+
+  <div class="rpt-card"><a href="#rpt-24">
+    <div class="rpt-card-bar bar-yellow"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-24</span>
+      <div class="rpt-card-name">Tasa de cotizaciones perdidas y motivo</div>
+      <div class="rpt-card-user">Coordinador · Dirección</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-18">
+    <div class="rpt-card-bar bar-yellow"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-18</span>
+      <div class="rpt-card-name">Antigüedad de oportunidades sin actividad</div>
+      <div class="rpt-card-user">Coordinador · Líder ventas</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-17">
+    <div class="rpt-card-bar bar-yellow"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-17</span>
+      <div class="rpt-card-name">Tiempo de vida promedio de oportunidad</div>
+      <div class="rpt-card-user">Coordinador · Dirección</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-05">
+    <div class="rpt-card-bar bar-yellow"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-05</span>
+      <div class="rpt-card-name">Tasa de conversión por etapa del pipeline</div>
+      <div class="rpt-card-user">Coordinador · Dirección</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-02-rpt-10">
+    <div class="rpt-card-bar bar-yellow"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-02 · RPT-10</span>
+      <div class="rpt-card-name">Ventas por marca / línea de producto</div>
+      <div class="rpt-card-user">Coordinador · Vendedor</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-07">
+    <div class="rpt-card-bar bar-yellow"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-07</span>
+      <div class="rpt-card-name">Nuevas oportunidades / clientes nuevos</div>
+      <div class="rpt-card-user">Coordinador Comercial</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-16">
+    <div class="rpt-card-bar bar-yellow"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-16</span>
+      <div class="rpt-card-name">Oportunidades generadas por ingeniería (cross-sell)</div>
+      <div class="rpt-card-user">Líder Ingeniería · Coordinador</div>
+    </div>
+  </a></div>
+
+</div>
+
+<!-- OLA 3 -->
+<div class="ola-header">
+  <span class="ola-badge ob-3">Ola 3</span>
+  <span class="ola-title">Setup mayor o datos previos requeridos</span>
+</div>
+<p class="ola-desc">No bloquean Ola 1/2 pero necesitan decisiones de configuración o que el sistema ya tenga datos reales.</p>
+<div class="rpt-grid">
+
+  <div class="rpt-card"><a href="#rpt-06">
+    <div class="rpt-card-bar bar-blue"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-06</span>
+      <div class="rpt-card-name">Visitas a clientes — cumplimiento de programa</div>
+      <div class="rpt-card-user">Coordinador · Líder Ing · Vendedores</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-12">
+    <div class="rpt-card-bar bar-blue"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-12</span>
+      <div class="rpt-card-name">Ventas por tipo de solución (ingeniería)</div>
+      <div class="rpt-card-user">Líder Ingeniería · Dirección</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-19">
+    <div class="rpt-card-bar bar-blue"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-19</span>
+      <div class="rpt-card-name">Tiempo de entrega de cotización</div>
+      <div class="rpt-card-user">Coordinador · Líder ventas</div>
+    </div>
+  </a></div>
+
+  <div class="rpt-card"><a href="#rpt-21">
+    <div class="rpt-card-bar bar-blue"></div>
+    <div class="rpt-card-body">
+      <span class="rpt-card-id">RPT-21</span>
+      <div class="rpt-card-name">Pronóstico vs. ventas reales (forecast accuracy)</div>
+      <div class="rpt-card-user">Dirección · Coordinador</div>
+    </div>
+  </a></div>
+
+</div>
+
+<!-- FUERA DE SCOPE -->
+<div class="ola-header">
+  <span class="ola-badge ob-scope">⛔ Fuera de scope</span>
+  <span class="ola-title">Sin fuente de dato definida ni plataforma asignada</span>
+</div>
+<p class="ola-desc">No tocar hasta decidir arquitectura. Requieren módulos o procesos que aún no están activos.</p>
+<div class="scope-list">
+  <div class="scope-item"><div class="scope-id">RPT-03</div><div><div class="scope-name">Margen de contribución promedio</div><div class="scope-reason">Requiere costos en Odoo por línea/producto</div></div></div>
+  <div class="scope-item"><div class="scope-id">RPT-08</div><div><div class="scope-name">Evaluación cliente externo (NPS)</div><div class="scope-reason">Sin plataforma de encuesta asignada</div></div></div>
+  <div class="scope-item"><div class="scope-id">RPT-13</div><div><div class="scope-name">Margen contribución proyectos</div><div class="scope-reason">Sin costos por proyecto en ERP</div></div></div>
+  <div class="scope-item"><div class="scope-id">RPT-14</div><div><div class="scope-name">Proyectos entregados en tiempo</div><div class="scope-reason">Requiere módulo Proyectos + fechas compromiso</div></div></div>
+  <div class="scope-item"><div class="scope-id">RPT-15</div><div><div class="scope-name">Tasa de garantías</div><div class="scope-reason">Sin proceso de registro (Helpdesk no activo)</div></div></div>
+  <div class="scope-item"><div class="scope-id">RPT-22</div><div><div class="scope-name">Evaluación cliente interno (ventas → ingeniería)</div><div class="scope-reason">Fase II — sin herramienta asignada</div></div></div>
+  <div class="scope-item"><div class="scope-id">RPT-25</div><div><div class="scope-name">Tiempo respuesta técnica ingeniería → ventas</div><div class="scope-reason">Requiere Helpdesk interno activo</div></div></div>
+  <div class="scope-item"><div class="scope-id">RPT-26</div><div><div class="scope-name">% Proyectos con retraso (DBR)</div><div class="scope-reason">Mismo prerrequisito que RPT-14</div></div></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     02 — DETALLE DE REPORTES
+════════════════════════════════════════ -->
+<div class="section-header">
+  <span class="section-num">02</span>
+  <h2 class="section-title">Detalle de Reportes Implementados</h2>
+</div>
+<p class="section-desc">Instrucciones paso a paso, lógica de negocio, fórmula de KPI y notas técnicas para cada reporte.</p>
+
+
+<!-- ─────────── RPT-01 ─────────── -->
+<div class="rpt-detail" id="rpt-01">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-01</span><div class="rpt-head-title">Ventas totales del equipo vs. meta</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Quitar cualquier filtro activo por defecto (clic en × de cada pill)</div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Filtros</strong> → <strong>Ganado</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Filtros</strong> → Fecha de cierre → <strong>[mes en curso]</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div><strong>Agrupar por</strong> → <strong>Equipo de ventas</strong> (primer nivel)</div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Agrupar por</strong> → <strong>Vendedor</strong> (segundo nivel, en ese orden)</div></li>
+      <li class="step"><div class="step-n">8</div><div><strong>Medidas</strong> → seleccionar <strong>Ingreso esperado</strong></div></li>
+      <li class="step"><div class="step-n">9</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-01 Ventas equipo → vendedor</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Lógica de negocio</span>
+    <p>Nivel 1 muestra el total del equipo — el coordinador ve el número agregado de su equipo. Nivel 2 desglosa por vendedor individual — permite detectar quién está por encima o por debajo.</p>
+    <p style="margin-top:10px"><strong>Uso mensual:</strong> Cambiar filtro de fecha: Filtros → Fecha de cierre → [mes]. Para vista trimestral usar Trimestre 1/2/3/4.</p>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Vista alternativa — Dashboard vs. Meta</span>
+    <p>CRM → menú superior → <strong>Ventas</strong> → <strong>Equipos</strong> — muestra cada equipo con barra de progreso <code>Facturación: X / Meta</code>. Es la vista más directa para el coordinador.</p>
+    <div style="margin-top:14px">
+      <span class="ds-label" style="margin-bottom:8px">Estado de metas por equipo</span>
+      <ul class="dl">
+        <li><strong>INGENIERIA</strong> → MX$1,000,000/mes ✅</li>
+        <li><strong>VENTAS A (SONORA)</strong> → MX$6,000,000/mes ✅</li>
+        <li><strong>ZONA B (FORÁNEOS)</strong> → sin meta ⚠️</li>
+        <li><strong>VENTA DIGITAL</strong> → sin meta ⚠️</li>
+        <li><strong>ADMINISTRACION</strong> → sin meta ⚠️</li>
+      </ul>
+      <div class="callout co-warn" style="margin-top:10px">
+        <span class="ctitle">Pendiente</span>Definir objetivos para los 3 equipos restantes (clic en «Haga clic para definir un objetivo» en cada tarjeta de equipo).
+      </div>
+    </div>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Medidas disponibles en Análisis de flujo</span>
+    <ul class="dl">
+      <li><code>Ingreso esperado</code> — valor de ventas ganadas (principal)</li>
+      <li><code>Días para el cierre</code> — ciclo de venta (útil para RPT-17)</li>
+      <li><code>Número</code> — conteo de oportunidades cerradas</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-09 ─────────── -->
+<div class="rpt-detail" id="rpt-09">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-09</span><div class="rpt-head-title">Ventas individuales por vendedor vs. meta</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">V</span>Vendedor — vista propia</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador — comparativa</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Cargar favorito <code>RPT-01 Ventas equipo → vendedor</code> como base</div></li>
+      <li class="step"><div class="step-n">4</div><div>En <strong>Agrupar por</strong> → quitar <strong>Equipo de ventas</strong>, dejar solo <strong>Vendedor</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div>Filtros <strong>Ganado</strong> + <strong>Fecha de cierre → [mes]</strong> se mantienen igual</div></li>
+      <li class="step"><div class="step-n">6</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-09 Ventas por vendedor</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Diferencia con RPT-01</span>
+    <p>RPT-01 agrupa primero por equipo (vista coordinador). RPT-09 muestra directamente cada vendedor sin nivel de equipo — útil para comparación directa entre individuos.</p>
+    <div class="callout co-info" style="margin-top:10px">
+      <span class="ctitle">Metas individuales por vendedor</span>
+      Actualmente las metas están configuradas a nivel equipo, no por vendedor. Para metas individuales se requiere el módulo de <strong>Gamificación</strong> o configurar objetivos manualmente. Pendiente evaluar si esta granularidad es necesaria en Fase 1.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-11 ─────────── -->
+<div class="rpt-detail" id="rpt-11">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-11</span><div class="rpt-head-title">Ventas totales (ingeniería)</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-blue"><span class="dot">I</span>Líder de Ingeniería</span>
+    <span class="ubadge ub-amber"><span class="dot">D</span>Dirección</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Quitar filtros activos por defecto (clic en ×)</div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Filtros</strong> → <strong>Ganado</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Filtros</strong> → Fecha de cierre → <strong>[mes en curso]</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div>En la barra de búsqueda escribir <code>INGENIERIA</code> → seleccionar <strong>Equipo de ventas contiene "INGENIERIA"</strong></div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Agrupar por</strong> → <strong>Vendedor</strong> (el equipo ya está aislado por el filtro)</div></li>
+      <li class="step"><div class="step-n">8</div><div><strong>Medidas</strong> → <strong>Ingreso esperado</strong></div></li>
+      <li class="step"><div class="step-n">9</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-11 Ventas ingeniería</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Diferencia con RPT-01 / RPT-09</span>
+    <p>Mismo reporte de Flujo pero restringido al equipo Ingeniería. No se necesita el nivel de equipo en el agrupador porque el filtro ya lo aísla. Muestra la contribución individual de cada ingeniero.</p>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Meta del equipo</span>
+    <ul class="dl">
+      <li><strong>Meta mensual:</strong> MX$1,000,000 (configurada en CRM → Ventas → Equipos → INGENIERIA)</li>
+      <li><strong>Vista vs. meta:</strong> CRM → Ventas → Equipos → tarjeta INGENIERIA → barra <code>Facturación: X / 1M</code></li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-04 ─────────── -->
+<div class="rpt-detail" id="rpt-04">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-04</span><div class="rpt-head-title">Cobranza — facturas cobradas en tiempo</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-dark"><span class="dot">A</span>Administración</span>
+  </div>
+
+  <div class="ds">
+    <span class="ds-label">Flujo A — Estado actual de cartera (operativo)</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>Contabilidad</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Sección «Reportes del contacto» → clic en <strong>Cuenta antigua por cobrar</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div>El reporte se genera automáticamente al día de hoy</div></li>
+      <li class="step"><div class="step-n">5</div><div>Opcional: <strong>Opciones</strong> → «Desplegar todo» para ver facturas individuales por cliente</div></li>
+      <li class="step"><div class="step-n">6</div><div>Exportar: botones <strong>PDF</strong> o <strong>XLSX</strong> en la esquina superior izquierda</div></li>
+      <li class="step"><div class="step-n">7</div><div>Guardar vista: botón <strong>GUARDAR</strong> → nombre <code>RPT-04 Cobranza</code></div></li>
+    </ol>
+    <div style="margin-top:14px">
+      <span class="ds-label" style="margin-bottom:8px">Cómo leer</span>
+      <ul class="dl">
+        <li><strong>En fecha</strong> — facturas abiertas que aún no vencen</li>
+        <li><strong>1–30, 31–60, 61–90, 91–120</strong> — días vencidas sin pagar</li>
+        <li><strong>Antiguos</strong> — +120 días (zona crítica)</li>
+        <li><strong>Total</strong> — cartera total pendiente</li>
+      </ul>
+    </div>
+    <div class="kpi-box" style="margin-top:14px">
+      <span class="kl">Cálculo del KPI</span>
+      <div>En fecha / Total × 100</div>
+      <div class="km">Meta ≥ 80%</div>
+    </div>
+  </div>
+
+  <div class="ds">
+    <span class="ds-label">Flujo B — Historial de facturas cobradas (% real pagado a tiempo)</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>Contabilidad</strong> → menú superior → <strong>Clientes</strong> → <strong>Facturas</strong></div></li>
+      <li class="step"><div class="step-n">2</div><div><strong>Filtros</strong> → <strong>Pagado</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div><strong>Filtros</strong> → Fecha de factura → <strong>[mes en curso]</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div>Activar columnas adicionales (ícono esquina superior derecha) → marcar <strong>Vendedor</strong> y <strong>Equipo de ventas</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div>Exportar: botón <strong>SUBIR</strong> (ícono descarga) → seleccionar <strong>XLSX</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div>En Excel: calcular <code>filas donde Fecha pago ≤ Fecha vencimiento / total filas × 100</code></div></li>
+    </ol>
+  </div>
+
+  <div class="ds">
+    <div class="callout co-danger">
+      <span class="ctitle">⚠️ Observación crítica — Fecha de vencimiento no utilizada</span>
+      Al revisar las facturas pagadas, la columna <strong>Fecha de vencimiento aparece en blanco en todos los registros</strong>. El KPI real de «cobrado a tiempo» no es calculable de forma precisa. Workaround temporal: usar <code>Fecha de pago – Fecha de factura</code> como proxy.<br><br>
+      <strong>Acción requerida:</strong> configurar <strong>términos de pago</strong> en los registros de clientes y/o en las facturas para que Odoo calcule automáticamente la fecha de vencimiento.
+    </div>
+    <div class="callout co-info">
+      <span class="ctitle">🔔 Pendiente revisar — Alerta automática 5 días antes del vencimiento</span>
+      Verificar si está activo: Contabilidad → Clientes → <strong>Seguimiento</strong>. Si existe, permite configurar niveles de recordatorio:
+      <ul class="dl" style="margin-top:8px">
+        <li>Nivel 1: –5 días antes del vencimiento (aviso preventivo)</li>
+        <li>Nivel 2: día 0 (recordatorio de vencimiento)</li>
+        <li>Nivel 3: +7, +15 días (cobranza activa)</li>
+      </ul>
+      <div style="margin-top:6px;font-style:italic">Prerrequisito: facturas con Fecha de vencimiento configurada.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-20 ─────────── -->
+<div class="rpt-detail" id="rpt-20">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-20</span><div class="rpt-head-title">Valor del pipeline activo (pipeline coverage)</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-amber"><span class="dot">D</span>Dirección</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Vista principal — Dashboard de Equipos</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Ventas</strong> → <strong>Equipos</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Cada tarjeta de equipo muestra en la parte superior derecha el <strong>ingreso esperado del pipeline activo</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div>Parte inferior de cada tarjeta: barra <code>Facturación: X / Meta</code> como referencia de cobertura</div></li>
+    </ol>
+    <ul class="dl" style="margin-top:14px">
+      <li>El valor en la tarjeta = suma de ingreso esperado de oportunidades abiertas del equipo</li>
+      <li>Cobertura saludable = pipeline activo ≥ 3× la meta mensual</li>
+      <li>Si el pipeline es menor a 2× la meta → alerta de riesgo de ventas</li>
+    </ul>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Vista alternativa — Análisis de flujo</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>CRM → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">2</div><div>Sin filtro de Ganado/Perdido — dejar solo oportunidades <strong>Activo</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div><strong>Filtros</strong> → <strong>Activo</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Agrupar por</strong> → <strong>Equipo de ventas</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Medidas</strong> → <strong>Ingreso esperado</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div>El total = valor del pipeline activo por equipo → Guardar como <code>RPT-20 Pipeline activo</code></div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Pipeline Coverage</span>
+      <div>Cobertura = Σ Ingreso esperado (oportunidades abiertas) / Meta mensual del equipo</div>
+      <div class="km">Meta recomendada: ratio ≥ 3.0x · Por debajo de 2.0x = riesgo</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-23 ─────────── -->
+<div class="rpt-detail" id="rpt-23">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-23</span><div class="rpt-head-title">Actividades de CRM completadas por vendedor</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-dark"><span class="dot">L</span>Líder de ventas</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Actividades</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Vista lista activa por defecto</div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Filtros</strong> → buscar y seleccionar <strong>Hecho</strong> (actividades marcadas como completadas)</div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Filtros</strong> → agregar rango de fecha: <strong>Fecha de vencimiento → [semana o mes actual]</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div><strong>Agrupar por</strong> → <strong>Asignado a</strong></div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-23 Actividades por vendedor</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Cómo leer</span>
+    <ul class="dl">
+      <li>Cada grupo = un vendedor con el conteo de actividades completadas en el período</li>
+      <li>Tipos de actividad que cuenta: llamadas, emails, visitas, demos, tareas</li>
+      <li>Un vendedor con 0 actividades en la semana = sin seguimiento activo</li>
+    </ul>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Tasa de actividad</span>
+      <div>Actividades completadas / Actividades programadas × 100</div>
+      <div class="km">Meta: definir mínimo semanal por rol — ej. 10 actividades/semana por vendedor</div>
+    </div>
+    <div class="callout co-info" style="margin-top:12px">
+      Este reporte mide <strong>disciplina de actividad</strong>, no resultados. Complementa RPT-01 — un vendedor puede tener muchas actividades pero pocas ventas (problema de calidad) o pocas actividades y muchas ventas (cliente clave recurrente).
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-24 ─────────── -->
+<div class="rpt-detail" id="rpt-24">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-24</span><div class="rpt-head-title">Tasa de cotizaciones perdidas y motivo</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-amber"><span class="dot">D</span>Dirección</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Configuración previa (ya aplicada)</span>
+    <p>CRM → Configuración → <strong>Motivos de pérdida</strong> → agregar razones relevantes para COINSA-MATIK. El feature ya estaba habilitado en esta instancia, no requirió activación en Ajustes.</p>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Quitar filtros activos por defecto (clic en ×)</div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Filtros</strong> → <strong>Perdido</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Agrupar por</strong> → <strong>Motivo de pérdida</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div><strong>Medidas</strong> → <strong>Número</strong> (conteo de oportunidades perdidas por motivo)</div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-24 Pérdidas por motivo</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Cómo leer</span>
+    <ul class="dl">
+      <li>Cada barra = un motivo de pérdida con su conteo de oportunidades</li>
+      <li>El motivo más alto = el cuello de botella comercial principal</li>
+      <li>Oportunidades sin motivo asignado = registros incompletos (disciplina pendiente)</li>
+    </ul>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Tasa de pérdidas</span>
+      <div>% pérdidas = Oportunidades perdidas / Total oportunidades cerradas × 100</div>
+      <div class="km">Para desglose económico: cambiar Medidas a Ingreso esperado → valor perdido por motivo</div>
+    </div>
+    <div class="callout co-warn" style="margin-top:12px">
+      <span class="ctitle">⚠️ Nota de adopción</span>
+      El reporte estará vacío hasta que los vendedores adopten el hábito de seleccionar el motivo. El dato se vuelve confiable después de 30–60 días de uso consistente.
+    </div>
+    <div class="callout co-action">
+      <span class="ctitle">Acción requerida</span>
+      Comunicar al equipo que al cerrar una oportunidad como perdida, el campo <strong>Motivo de pérdida es obligatorio</strong>. Sin este dato el reporte no tiene valor.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-18 ─────────── -->
+<div class="rpt-detail" id="rpt-18">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-18</span><div class="rpt-head-title">Antigüedad de oportunidades sin actividad</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-dark"><span class="dot">L</span>Líder de ventas</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> → vista <strong>Flujo</strong> → cambiar a <strong>Vista lista</strong> (icono esquina superior derecha)</div></li>
+      <li class="step"><div class="step-n">2</div><div><strong>Filtros</strong> → <strong>Oportunidades abiertas</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div><strong>Filtros</strong> → <strong>Agregar filtro personalizado</strong>: campo = <strong>Fecha límite de la siguiente actividad</strong> · operador = <strong>no está establecido</strong> → Aplicar</div></li>
+      <li class="step"><div class="step-n">4</div><div>Ordenar por columna <strong>Última acción</strong> (clic en el encabezado) → ascendente (más antiguo primero)</div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-18 Sin actividad</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Cómo leer</span>
+    <ul class="dl">
+      <li>Cada fila = oportunidad activa sin ninguna actividad futura programada</li>
+      <li>Las filas al inicio (ordenadas por Última acción asc.) = las más abandonadas</li>
+      <li>Columna <strong>Última acción</strong> indica cuándo fue el último contacto registrado</li>
+      <li>⚠️ Amarillo: sin actividad &gt; 7 días · 🔴 Rojo: sin actividad &gt; 15 días</li>
+    </ul>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">KPI de abandono</span>
+      <div>Nº oportunidades abiertas sin actividad programada</div>
+      <div class="km">Meta ideal: 0 · Cualquier número &gt; 0 requiere acción inmediata del coordinador</div>
+    </div>
+    <div class="callout co-action" style="margin-top:12px">
+      Este es el indicador más directo de abandono del CRM. Una oportunidad sin actividad = nadie la está trabajando. Revisar este reporte debe ser parte de la <strong>reunión semanal</strong> del equipo comercial.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-17 ─────────── -->
+<div class="rpt-detail" id="rpt-17">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-17</span><div class="rpt-head-title">Tiempo de vida promedio de oportunidad (ciclo de venta)</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-amber"><span class="dot">D</span>Dirección</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Quitar filtros por defecto (clic en ×)</div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Filtros</strong> → <strong>Ganado</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Filtros</strong> → Fecha de cierre → <strong>[mes en curso]</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div><strong>Agrupar por</strong> → <strong>Equipo de ventas</strong></div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Medidas</strong> → activar <strong>Días para el cierre</strong> + <strong>Número</strong> (ambas simultáneamente)</div></li>
+      <li class="step"><div class="step-n">8</div><div>Cambiar a <strong>vista pivote</strong> (icono de tabla)</div></li>
+      <li class="step"><div class="step-n">9</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-17 Ciclo de venta</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Cómo leer</span>
+    <ul class="dl">
+      <li>Columna <strong>Días para el cierre</strong> = suma total de días de todas las oportunidades del grupo</li>
+      <li>Columna <strong>Número</strong> = cantidad de oportunidades ganadas en el período</li>
+      <li><strong>Promedio real = Días para el cierre / Número</strong> (calcular por fila)</li>
+      <li>Ignorar filas con Días = 0.00 (etapas sin fecha de cierre registrada)</li>
+    </ul>
+    <div class="eg-box">
+      <span class="el">Datos reales — Staging 2026 (ganadas)</span>
+      INGENIERIA: 36 días / 1 deal = 36 días promedio<br>
+      VENTAS A (SONORA): 385 días / 12 deals = 32.1 días promedio<br>
+      Total: 421 días / 13 deals = 32.4 días promedio
+    </div>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Ciclo de venta promedio</span>
+      <div>Ciclo promedio (días) = Σ Días para el cierre / Nº oportunidades ganadas</div>
+      <div class="km">Odoo muestra la suma, no el promedio. La división es manual o vía exportación XLSX.</div>
+    </div>
+    <div class="callout co-danger" style="margin-top:12px">
+      <span class="ctitle">⚠️ Limitación de Odoo</span>
+      El gráfico de barras muestra SUMA de días, no el promedio. <strong>No usar el gráfico para este KPI</strong> — usar exclusivamente la vista pivote con ambas medidas activadas.
+    </div>
+    <div class="callout co-info">
+      <span class="ctitle">Campo descartado</span>
+      El campo <strong>Días a convertir</strong> dio 0.00 en todos los registros porque las oportunidades se crean directamente sin pasar por etapa de lead.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-05 ─────────── -->
+<div class="rpt-detail" id="rpt-05">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-05</span><div class="rpt-head-title">Tasa de conversión por etapa del pipeline</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-amber"><span class="dot">D</span>Dirección</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Quitar todos los filtros activos (clic en ×)</div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Agrupar por</strong> → <strong>Etapa</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Medidas</strong> → <strong>Número</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div>Vista <strong>gráfico de barras</strong></div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-05 Embudo por etapa</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Cómo leer</span>
+    <ul class="dl">
+      <li>Cada barra = número de oportunidades activas en esa etapa</li>
+      <li>Barras decrecientes de izquierda a derecha = forma de embudo normal</li>
+      <li>Una barra desproporcionalmente alta en una etapa = cuello de botella</li>
+    </ul>
+    <div class="eg-box">
+      <span class="el">Datos reales — Pipeline activo 2026</span>
+      Nuevo → Diagnóstico: ~75 / 360 = 21% conversión<br>
+      Diagnóstico → Cotizado: ~15 / 75 = 20% conversión<br>
+      Conversión total (Nuevo → Cotizado): 15 / 360 = 4.2%
+    </div>
+    <div class="callout co-danger" style="margin-top:12px">
+      <span class="ctitle">⚠️ Cuello de botella identificado</span>
+      La mayor caída ocurre en <strong>Nuevo → Diagnóstico</strong>. La mayoría de oportunidades no avanzan de la primera etapa.
+    </div>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Conversión por etapa</span>
+      <div>Tasa etapa N→N+1 = Oportunidades en etapa N+1 / Oportunidades en etapa N × 100</div>
+      <div class="km">Este reporte muestra el pipeline activo. Para conversión histórica: agregar filtro Ganado + rango de fecha.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-02 / RPT-10 ─────────── -->
+<div class="rpt-detail" id="rpt-02-rpt-10">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-02 · RPT-10</span><div class="rpt-head-title">Ventas por marca / línea de producto</div></div>
+    <div class="rpt-head-right"><span class="pill pill-partial">⚠️ Funcional con limitación</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-dark"><span class="dot">V</span>Vendedor individual</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Quitar filtros por defecto (clic en ×)</div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Filtros</strong> → <strong>Ganado</strong> + <strong>Fecha de cierre → [mes en curso]</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Agrupar por</strong> → <strong>Etiquetas</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div><strong>Medidas</strong> → <strong>Ingreso esperado</strong></div></li>
+      <li class="step"><div class="step-n">7</div><div>Vista <strong>gráfico de barras</strong></div></li>
+      <li class="step"><div class="step-n">8</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-02 Ventas por marca</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Estado actual de las etiquetas (45 registradas)</span>
+    <p>Las etiquetas mezclan tres categorías distintas sin separación:</p>
+    <ul class="dl" style="margin-top:10px">
+      <li><strong>Sectores/industria</strong> (1–17): Minería, Energía, Alimentos, Automotriz, etc.</li>
+      <li><strong>Números de O.C.</strong> (18–21): etiquetas operacionales (O.C.: 4658, etc.)</li>
+      <li><strong>Marcas/productos</strong> (23–45): Sensores Banner, HMI SIEMENS, Festo, Omron, Dorner, etc.</li>
+    </ul>
+    <div class="callout co-danger" style="margin-top:12px">
+      <span class="ctitle">⚠️ Recomendación — Limpieza de taxonomía de etiquetas</span>
+      El reporte es técnicamente funcional pero los resultados son poco confiables mientras las etiquetas mezclen sectores, marcas y números de orden. Acciones requeridas antes de usar en producción:
+      <ul class="dl" style="margin-top:10px">
+        <li>Definir qué es una etiqueta de marca (ej. Banner, Siemens, Festo, Omron, OMEC)</li>
+        <li>Separar con prefijos: <code>SECTOR:</code> para industrias · <code>MARCA:</code> para productos</li>
+        <li>Eliminar etiquetas de O.C. (números de orden no deberían ser etiquetas en CRM)</li>
+        <li>Asignar etiqueta de marca obligatoria en toda oportunidad nueva</li>
+      </ul>
+      <div style="margin-top:8px;font-style:italic">Hasta que se haga esta limpieza, sus datos no son comparables ni auditables.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-07 ─────────── -->
+<div class="rpt-detail" id="rpt-07">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-07</span><div class="rpt-head-title">Nuevas oportunidades / clientes nuevos</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado (dos flujos)</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Flujo A — Nuevas oportunidades por cliente (este mes)</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">2</div><div>Quitar filtros por defecto (clic en ×)</div></li>
+      <li class="step"><div class="step-n">3</div><div><strong>Filtros</strong> → Creado el → <strong>[mes en curso]</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Agrupar por</strong> → <strong>Cliente</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Medidas</strong> → <strong>Número</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div>Vista <strong>gráfico de barras</strong></div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Favoritos</strong> → Guardar → <code>RPT-07 Nuevas oportunidades por cliente</code></div></li>
+    </ol>
+    <p style="margin-top:10px;font-size:12.5px;color:var(--muted);font-style:italic">Cada barra = número de oportunidades nuevas abiertas para ese cliente en el mes. No distingue si el cliente es nuevo o recurrente.</p>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Flujo B — Clientes nuevos registrados (primera vez en Odoo)</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> → menú superior → <strong>Ventas</strong> → <strong>Clientes</strong></div></li>
+      <li class="step"><div class="step-n">2</div><div><strong>Filtros</strong> → <strong>Agregar filtro personalizado</strong> → Campo: <strong>Creado el</strong> · Operador: <strong>entre</strong> · rango: primer y último día del mes</div></li>
+      <li class="step"><div class="step-n">3</div><div><strong>Agrupar por</strong> → <strong>Vendedor</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Favoritos</strong> → Guardar → <code>RPT-07 Clientes nuevos</code></div></li>
+    </ol>
+    <p style="margin-top:10px;font-size:12.5px;color:var(--muted);font-style:italic">Cada grupo = vendedor con sus clientes nuevos del período.</p>
+  </div>
+  <div class="ds">
+    <div class="callout co-danger">
+      <span class="ctitle">⚠️ Clientes sin vendedor asignado</span>
+      En el Flujo B se detectó el grupo <strong>«Ninguno» con 42 clientes</strong> sin vendedor asignado creados en el período abril–mayo 2026. Acción requerida: revisar y asignar vendedor a cada contacto.
+    </div>
+    <ul class="dl" style="margin-top:12px">
+      <li><strong>Flujo A</strong> = actividad comercial nueva (oportunidades abiertas por cliente)</li>
+      <li><strong>Flujo B</strong> = base de datos de clientes nueva (contactos registrados por primera vez)</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-16 ─────────── -->
+<div class="rpt-detail" id="rpt-16">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-16</span><div class="rpt-head-title">Oportunidades generadas por ingeniería (cross-sell)</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-blue"><span class="dot">I</span>Líder de Ingeniería</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Qué mide</span>
+    <p>Oportunidades de venta identificadas por ingeniería durante trabajo en campo. Cuando un ingeniero detecta una necesidad adicional, la registra como actividad <strong>Hand-off a Ventas</strong> y la asigna a un vendedor para su seguimiento.</p>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Configuración aplicada — Tipo de actividad "Hand-off a Ventas"</span>
+    <p>Crear en: CRM → Configuración → <strong>Tipos de actividad</strong> → Nuevo</p>
+    <ul class="dl" style="margin-top:8px">
+      <li><strong>Nombre:</strong> <code>Hand-off a Ventas</code></li>
+      <li><strong>Tipo de acción predeterminado:</strong> Tarea</li>
+    </ul>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Flujo de proceso</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Ingeniero está con un cliente y detecta una oportunidad comercial adicional</div></li>
+      <li class="step"><div class="step-n">2</div><div>Abre el contacto o la oportunidad actual en Odoo</div></li>
+      <li class="step"><div class="step-n">3</div><div>Registra actividad tipo <strong>Hand-off a Ventas</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div>Asigna la actividad a un vendedor específico</div></li>
+      <li class="step"><div class="step-n">5</div><div>Escribe en las notas el contexto: qué necesita el cliente, cuál es la oportunidad</div></li>
+      <li class="step"><div class="step-n">6</div><div>El vendedor recibe la actividad en su bandeja y crea la oportunidad formal</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación del reporte</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Actividades</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div><strong>Filtros</strong> → <strong>Hecho</strong> + filtro por tipo de actividad: <strong>Hand-off a Ventas</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Filtros</strong> → Fecha de vencimiento → <strong>[mes en curso]</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Agrupar por</strong> → <strong>Asignado a</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div><strong>Medidas</strong> → <strong>Número</strong></div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Favoritos</strong> → Guardar → <code>RPT-16 Hand-offs ingeniería</code></div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Volumen de cross-sell</span>
+      <div>Nº hand-offs realizados por ingeniería / mes</div>
+      <div class="km">Métrica secundaria (efectividad): Nº oportunidades creadas a partir de hand-offs / Nº hand-offs totales</div>
+    </div>
+    <div class="callout co-action" style="margin-top:12px">
+      <span class="ctitle">Ventaja sobre etiquetas</span>
+      La actividad de Hand-off crea trazabilidad temporal exacta, aparece en la bandeja del vendedor como acción pendiente, y permite medir tanto volumen (ingeniería) como efectividad (ventas). Complementar con RPT-07 Flujo A para ver cuántos hand-offs se convirtieron en oportunidad real.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-06 ─────────── -->
+<div class="rpt-detail" id="rpt-06">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-06</span><div class="rpt-head-title">Visitas a clientes — cumplimiento de programa</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-blue"><span class="dot">I</span>Líder de Ingeniería</span>
+    <span class="ubadge ub-dark"><span class="dot">V</span>Vendedores</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Configuración aplicada</span>
+    <p>Tipo de actividad <code>Visita</code> creado en: CRM → Configuración → <strong>Tipos de actividad</strong></p>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Menú superior → <strong>Reportes</strong> → <strong>Actividades</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div><strong>Filtros</strong> → Tipo de actividad: <strong>Visita</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Filtros</strong> → Fecha de finalización → <strong>[mes en curso]</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Agrupar por</strong> → <strong>Asignado a</strong></div></li>
+      <li class="step"><div class="step-n">6</div><div>Opcional: segundo nivel → <strong>Agrupar por</strong> → Fecha de finalización → Mes</div></li>
+      <li class="step"><div class="step-n">7</div><div><strong>Favoritos</strong> → Guardar búsqueda actual → nombre <code>RPT-06 Visitas por vendedor</code> → Guardar</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Cumplimiento de visitas</span>
+      <div>% Cumplimiento = Visitas realizadas (registradas en Odoo) / Visitas programadas × 100</div>
+      <div class="km">El denominador debe definirse como meta fija por rol — ej. 8 visitas/mes por vendedor</div>
+    </div>
+    <div class="callout co-warn" style="margin-top:12px">
+      <span class="ctitle">Nota importante</span>
+      El reporte empieza a tener datos desde el momento en que el equipo adopte el hábito de registrar visitas con el tipo de actividad <strong>Visita</strong>. No hay datos históricos anteriores a la creación del tipo de actividad.
+    </div>
+    <div class="callout co-action">
+      <span class="ctitle">Política de registro recomendada</span>
+      Toda visita a cliente debe registrarse en Odoo antes o después de realizarse. Sin esta política, el reporte mide disciplina CRM, no visitas reales.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-12 ─────────── -->
+<div class="rpt-detail" id="rpt-12">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-12</span><div class="rpt-head-title">Ventas por tipo de solución (ingeniería)</div></div>
+    <div class="rpt-head-right"><span class="pill pill-partial">⚙️ Campo pendiente en Studio</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-blue"><span class="dot">I</span>Líder de Ingeniería</span>
+    <span class="ubadge ub-amber"><span class="dot">D</span>Dirección</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Pasos de configuración (Odoo Studio)</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Activar modo Studio: menú principal → icono de cuadrado punteado (Studio)</div></li>
+      <li class="step"><div class="step-n">2</div><div>Navegar a <strong>CRM → Flujo</strong> → abrir cualquier oportunidad</div></li>
+      <li class="step"><div class="step-n">3</div><div>En modo Studio: <strong>Agregar campo</strong> → tipo <strong>Selección</strong></div></li>
+      <li class="step"><div class="step-n">4</div><div>Nombre del campo: <code>Tipo de solución</code></div></li>
+      <li class="step"><div class="step-n">5</div><div>Opciones: <code>Venta directa</code> · <code>Servicio / Asesoría</code> · <code>Integración</code></div></li>
+      <li class="step"><div class="step-n">6</div><div>Marcar como campo <strong>obligatorio</strong> en oportunidades del equipo Ingeniería</div></li>
+      <li class="step"><div class="step-n">7</div><div>Guardar y salir de Studio</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación del reporte (una vez configurado)</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>CRM</strong> → <strong>Reportes</strong> → <strong>Flujo</strong></div></li>
+      <li class="step"><div class="step-n">2</div><div>Filtro: <strong>Equipo de ventas: INGENIERIA</strong> + <strong>Ganado</strong> + <strong>Fecha de cierre → [mes]</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div><strong>Agrupar por</strong> → <strong>Tipo de solución</strong> (el nuevo campo)</div></li>
+      <li class="step"><div class="step-n">4</div><div><strong>Medidas</strong> → <strong>Ingreso esperado</strong></div></li>
+      <li class="step"><div class="step-n">5</div><div><strong>Favoritos</strong> → Guardar → <code>RPT-12 Ventas por tipo solución</code></div></li>
+    </ol>
+    <div class="callout co-info" style="margin-top:12px">
+      El reporte empieza a tener datos desde que se configure el campo y el equipo lo llene en cada oportunidad. Cada barra = ingreso generado por tipo de solución — permite identificar qué tipo de trabajo genera más valor para ingeniería.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-19 ─────────── -->
+<div class="rpt-detail" id="rpt-19">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-19</span><div class="rpt-head-title">Tiempo de entrega de cotización</div></div>
+    <div class="rpt-head-right"><span class="pill pill-yes">✅ Implementado</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+    <span class="ubadge ub-dark"><span class="dot">L</span>Líder de ventas</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fuente de datos</span>
+    <p>El campo existe en Odoo: Ventas → Presupuestos registra la <strong>Fecha de pedido</strong> (creación) y cuando se envía la cotización por correo, queda el registro en el chatter con timestamp.</p>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Navegación</span>
+    <ol class="steps">
+      <li class="step"><div class="step-n">1</div><div>Módulo <strong>Ventas</strong> (menú principal)</div></li>
+      <li class="step"><div class="step-n">2</div><div><strong>Pedidos</strong> → <strong>Presupuestos</strong></div></li>
+      <li class="step"><div class="step-n">3</div><div>Vista lista → activar columna <strong>Fecha de pedido</strong> (fecha de creación)</div></li>
+      <li class="step"><div class="step-n">4</div><div>Buscar si existe columna <strong>Fecha de envío</strong> en el selector de columnas</div></li>
+      <li class="step"><div class="step-n">5</div><div>Si existe: <code>Tiempo de entrega = Fecha de envío – Fecha de pedido</code> por fila</div></li>
+      <li class="step"><div class="step-n">6</div><div>Exportar XLSX para calcular promedio por vendedor/equipo</div></li>
+    </ol>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Velocidad de cotización</span>
+      <div>Días promedio = (Fecha envío – Fecha creación) promedio por vendedor</div>
+      <div class="km">Meta sugerida: ≤ 3 días hábiles</div>
+    </div>
+    <div class="callout co-warn" style="margin-top:12px">
+      <span class="ctitle">Pendiente confirmar</span>
+      Si el campo «Fecha de envío» existe como columna en la vista lista de Presupuestos. Si no existe como campo nativo, el timestamp del chatter es la única fuente — no exportable directamente.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────────── RPT-21 ─────────── -->
+<div class="rpt-detail" id="rpt-21">
+  <div class="rpt-head">
+    <div><span class="rpt-head-id">RPT-21</span><div class="rpt-head-title">Pronóstico vs. ventas reales (forecast accuracy)</div></div>
+    <div class="rpt-head-right"><span class="pill pill-info">📊 Reporte nativo</span><span class="rpt-date">2026-05-15</span></div>
+  </div>
+  <div class="user-row">
+    <span class="user-lbl">Usuario objetivo</span>
+    <span class="ubadge ub-amber"><span class="dot">D</span>Dirección</span>
+    <span class="ubadge ub-dark"><span class="dot">C</span>Coordinador Comercial</span>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Reporte nativo de Odoo</span>
+    <p>CRM → <strong>Reportes</strong> → <strong>Pronóstico</strong> — muestra oportunidades agrupadas por mes de cierre esperado en vista kanban con el ingreso esperado de cada una.</p>
+    <ul class="dl" style="margin-top:12px">
+      <li>Cada columna = mes de cierre esperado</li>
+      <li>Cada tarjeta = oportunidad con su ingreso esperado</li>
+      <li>El total de cada columna = ingreso esperado del mes (el pronóstico)</li>
+      <li>Comparar con las ventas reales del mismo mes (de RPT-01) = precisión del forecast</li>
+    </ul>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Fórmula KPI</span>
+    <div class="kpi-box">
+      <span class="kl">Forecast Accuracy</span>
+      <div>Desviación = |Pronóstico mes X – Ventas reales mes X| / Ventas reales × 100</div>
+      <div class="km">Meta: desviación &lt; 15% mensual · Cálculo manual cruzando este reporte con RPT-01</div>
+    </div>
+  </div>
+  <div class="ds">
+    <span class="ds-label">Condiciones requeridas para pronóstico confiable</span>
+    <ul class="dl">
+      <li><strong>Toda oportunidad activa debe tener fecha de cierre esperada definida</strong> — las que aparecen en "Ninguno" no se incluyen en el forecast</li>
+      <li><strong>Probabilidades asignadas por etapa</strong> — CRM → Configuración → Etapas → % de probabilidad por etapa</li>
+      <li><strong>Pipeline limpio</strong> — oportunidades sin actividad &gt;30 días deben ser actualizadas o archivadas (usar RPT-18)</li>
+      <li><strong>Cierre esperado realista</strong> — no amontonar oportunidades en el mismo mes sin actualizar</li>
+    </ul>
+    <div class="callout co-danger" style="margin-top:12px">
+      <span class="ctitle">⚠️ Observación del staging</span>
+      La mayoría de oportunidades están en la columna <strong>«Ninguno»</strong> (sin fecha de cierre esperada). Esto hace que el pronóstico actual sea prácticamente inutilizable. Acción correctiva: asignar fecha de cierre esperada a todas las oportunidades activas.
+    </div>
+  </div>
+</div>
+
+
+</div><!-- /main -->
+
+<footer>
+  <div>COINSA-MATIK · <span>Tracker de Reportes</span> · Implementación Odoo CRM</div>
+  <div>17 reportes implementados · Última actualización: <span>2026-05-15</span></div>
+</footer>
+
+</body>
+</html>
