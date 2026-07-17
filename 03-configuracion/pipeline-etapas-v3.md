@@ -36,9 +36,9 @@ La línea divisoria entre MQL y SQL no es una etapa visible en el pipeline — e
 - Empresa (si es negocio)
 
 **Actividades siguientes:**
-- [ ] Asignación a vendedor
-- [ ] Contacto inicial (llamada o correo)
-- [ ] Calificación del lead
+- [ ] Asignación a vendedor — Designar al vendedor responsable de dar seguimiento a la oportunidad según el tipo de cliente, producto o equipo comercial correspondiente.
+- [ ] Contacto inicial (llamada o correo) — Realizar el primer acercamiento con el lead para confirmar su interés, presentar a COINSA-MATIK y obtener información básica de su necesidad.
+- [ ] Calificación del lead — Validar que el lead tiene una necesidad real, presupuesto viable y un decisor identificado, para determinar si merece avanzar en el pipeline como oportunidad activa (SQL).
 
 **Responsable:** Equipo de Coordinación o ventas internas (Hermenegildo, Guillermo, Miguel)
 
@@ -56,8 +56,8 @@ La línea divisoria entre MQL y SQL no es una etapa visible en el pipeline — e
 - Presupuesto estimado (indicativo)
 
 **Actividades siguientes:**
-- [ ] Reunión técnica (si aplica)
-- [ ] Validación con ingeniería (para proyectos técnicos)
+- [ ] Reunión técnica (si aplica) — Sesión con el cliente para profundizar en sus requerimientos técnicos y definir las especificaciones necesarias para elaborar una propuesta o cotización.
+- [ ] Validación con ingeniería (para proyectos técnicos) — Consulta interna con el equipo técnico (Arturo) para confirmar que la necesidad del cliente es viable de atender con la oferta de COINSA-MATIK antes de proceder con el diseño o cotización.
 
 **Responsable:** Vendedor asignado
 
@@ -75,8 +75,8 @@ La línea divisoria entre MQL y SQL no es una etapa visible en el pipeline — e
 - Tipo de venta identificado
 
 **Actividades siguientes:**
-- [ ] Dimensionamiento técnico
-- [ ] Elaborar propuesta o cotización
+- [ ] Dimensionamiento técnico — Cuantificar los recursos, componentes y alcance técnico requeridos para atender la necesidad del cliente, como base para elaborar la propuesta.
+- [ ] Elaborar propuesta o cotización — Preparar el documento formal con la solución propuesta, especificaciones, precios y condiciones comerciales para presentar al cliente.
 
 **Responsable:** Vendedor asignado
 
@@ -93,9 +93,9 @@ La línea divisoria entre MQL y SQL no es una etapa visible en el pipeline — e
 - Documentación técnica adjunta
 
 **Actividades siguientes:**
-- [ ] Diseño de solución técnica
-- [ ] Presentación al cliente
-- [ ] Revisión y ajustes
+- [ ] Diseño de solución técnica — Estructurar la solución completa (componentes, configuración, alcance) que responde a los requerimientos técnicos validados con el cliente.
+- [ ] Presentación al cliente — Exponer la solución técnica y comercial al cliente y/o decisor para obtener retroalimentación y avanzar hacia el cierre.
+- [ ] Revisión y ajustes — Incorporar los comentarios y cambios solicitados por el cliente o el equipo técnico antes de emitir la cotización formal.
 
 **Responsable:** Equipo técnico (Arturo)
 
@@ -114,8 +114,8 @@ La línea divisoria entre MQL y SQL no es una etapa visible en el pipeline — e
 - Validez de la cotización definida
 
 **Actividades siguientes:**
-- [ ] Esperar respuesta del cliente
-- [ ] A los 10 días sin respuesta → Odoo mueve automáticamente a Seguimiento
+- [ ] Esperar respuesta del cliente — Dar tiempo al cliente para evaluar la cotización enviada; monitorear el plazo de validez y registrar cualquier comunicación recibida.
+- [ ] A los 10 días sin respuesta → Odoo mueve automáticamente a Seguimiento — Automatización AUT-01: la oportunidad avanza a Seguimiento para que el vendedor reactive el contacto.
 
 **Responsable:** Vendedor
 
@@ -131,10 +131,10 @@ La línea divisoria entre MQL y SQL no es una etapa visible en el pipeline — e
 - Notas de negociación registradas en la oportunidad
 
 **Actividades siguientes:**
-- [ ] Llamada o reunión con el cliente
-- [ ] Reenvío de cotización ajustada (si aplica)
-- [ ] Negociación de precios y términos
-- [ ] Registro de retroalimentación del cliente
+- [ ] Llamada o reunión con el cliente — Retomar contacto activo para identificar objeciones, resolver dudas y mantener viva la negociación.
+- [ ] Reenvío de cotización ajustada (si aplica) — Enviar una versión revisada de la cotización que incorpore cambios de precio, alcance o condiciones negociados con el cliente.
+- [ ] Negociación de precios y términos — Trabajar con el cliente para llegar a un acuerdo sobre el monto, condiciones de pago y alcance que permita cerrar la venta.
+- [ ] Registro de retroalimentación del cliente — Documentar en la oportunidad las objeciones, comentarios y acuerdos obtenidos durante la negociación para mantener el historial actualizado.
 
 **Responsable:** Vendedor
 
@@ -150,7 +150,7 @@ La línea divisoria entre MQL y SQL no es una etapa visible en el pipeline — e
 - Condiciones de pago finales registradas
 
 **Actividades siguientes:**
-- [ ] Seguimiento post-entrega (5 días después de entrega)
+- [ ] Seguimiento post-entrega (5 días después de entrega) — Contactar al cliente tras la entrega para confirmar su satisfacción, resolver cualquier pendiente y fortalecer la relación comercial.
 
 **Responsable:** Vendedor
 
