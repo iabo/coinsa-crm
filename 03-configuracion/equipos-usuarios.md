@@ -12,14 +12,20 @@
 
 ### Equipo 2: Ventas A (Sonora)
 - **Líder del equipo:** Guillermo Velez Sabag / Juan Manuel Chavez
-- **Integrantes:** Hermenegildo Garcia, Miguel Gaytán, Arnoldo López, David Herrera Canedo, Jorge Corral, Guillermo Angulo Ivich, Miriam Valenzuela, Hector Garcia, David Ochoa, Joel Urquidez, Edwin Jacobo, Daniel Flores, Luis A Sanchez
+- **Integrantes:** Miguel Gaytán, Arnoldo López, David Herrera Canedo, Jorge Corral, Guillermo Angulo Ivich, Miriam Valenzuela, Hector Garcia, David Ochoa, Joel Urquidez, Edwin Jacobo, Daniel Flores, Luis A Sanchez
 - **Responsabilidad:** Captación de leads, calificación, asignación, ventas de campo y cierre
 - **Procesos:** Leads → oportunidades, coordinación con equipo técnico
 
-### Equipo 3: Soporte Comercial
+### Equipo 3: Ventas Internas
+- **Líder del equipo:** Hermenegildo Garcia
+- **Integrantes:** [A confirmar — posibles: Martha Molina para soporte]
+- **Responsabilidad:** Captura de leads inbound (WhatsApp, correo, teléfono), primer contacto, calificación inicial
+- **Procesos:** Lead entrante → contacto inicial → asignación a vendedor de campo o vendedor técnico
+
+### Equipo 4: Soporte Comercial
 - **Líder del equipo:** Rosa Estrada Nambo
 - **Integrantes:** [A confirmar]
-- **Responsabilidad:** Seguimiento post-entrega, atención al cliente
+- **Responsabilidad:** Seguimiento post-entrega, atención al cliente, resolución de incidencias postventa
 - **Procesos:** Confirmación de recepción, soporte postventa, incidencias
 
 ---
@@ -32,7 +38,7 @@
 | Guillermo Velez Sabag | gvelez@coinsa.com | Coordinador de Ventas | Ventas | CRM / Líder de equipo · **Key User CRM** | Ventas A | Coordinación del equipo de ventas — valida procesos y replica conocimiento |
 | Arturo Gil Armenta | arturo@coinsa.com | Ingeniero Técnico de Ventas | Ventas Técnicas | CRM + Sales / Usuario · **Key User Ventas Técnicas** | Ingeniería | Ventas técnicas, diseño de soluciones, cotizaciones complejas |
 | Juan Manuel Chavez | [pendiente] | Coordinador de Ventas | Ventas | CRM + Sales / Usuario | Ventas A | Coordinación del equipo de ventas |
-| Hermenegildo Garcia | herm@coinsa.com | Ejecutivo de Ventas Internas | Ventas Internas | CRM / Usuario | Ventas A | Punto de captura de leads (WA · correo · teléfono), primer contacto y calificación |
+| Hermenegildo Garcia | herm@coinsa.com | Ejecutivo de Ventas Internas | Ventas Internas | CRM / Líder de equipo | Ventas Internas | Punto de captura de leads (WA · correo · teléfono), primer contacto y calificación — líder del equipo Ventas Internas |
 | Miguel Gaytán | miguel.tj@coinsa.com | Vendedor Regional | Ventas — Tijuana | CRM / Usuario | Ventas A | Desarrollo de territorio Tijuana, visitas de campo y cierre |
 | Arnoldo López | [pendiente] | Vendedor Regional | Ventas — Nogales | CRM / Usuario | Ventas A | Desarrollo de territorio Nogales, visitas de campo |
 | David Herrera Canedo | [pendiente] | Vendedor | Ventas | CRM / Usuario | Ventas A | Ventas de campo, cotizaciones y seguimiento |
@@ -85,9 +91,11 @@
 
 ## Checklist de Configuración
 
-- [ ] Crear 3 equipos en Odoo CRM con sus metas mensuales
+- [ ] Crear 4 equipos en Odoo CRM con sus metas mensuales
 - [ ] Crear usuario en Odoo para cada persona de la tabla
 - [ ] Asignar roles según la tabla de usuarios
 - [ ] Asignar cada usuario a su equipo correspondiente
 - [ ] Definir reglas de asignación automática de leads
 - [ ] Validar accesos con cada líder de equipo
+- [ ] Confirmar miembros del equipo Ventas Internas
+- [ ] Confirmar miembros del equipo Soporte Comercial

@@ -96,11 +96,12 @@ Crear o verificar que existan las siguientes etiquetas con la convención de pre
 ```
 SECTOR: Minería
 SECTOR: Energía
-SECTOR: Alimentos
+SECTOR: Alimentos y bebidas
 SECTOR: Automotriz
 SECTOR: Manufactura
 SECTOR: Agua y Saneamiento
 SECTOR: Farmacéutico
+SECTOR: Médico
 SECTOR: Petroquímica
 SECTOR: Construcción
 SECTOR: Gobierno
@@ -119,6 +120,23 @@ MARCA: Beckhoff
 MARCA: SMC
 MARCA: Cognex
 MARCA: SICK
+MARCA: GF
+MARCA: Turck
+MARCA: Hoffman
+MARCA: Rittal
+MARCA: EMC
+MARCA: IFM
+MARCA: Danfoss
+MARCA: Altech
+MARCA: Wago
+MARCA: Schneider
+MARCA: Ashcroft
+MARCA: ASCO
+MARCA: HPL
+MARCA: Allen-Bradley
+MARCA: Phoenix Contact
+MARCA: Kobold
+MARCA: Nidec
 MARCA: Otros
 ```
 
