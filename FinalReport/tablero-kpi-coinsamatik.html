@@ -135,11 +135,9 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
   
   <div class="cfg-section">
     <div class="cfg-title">Datos Odoo</div>
-    <label>CSV Principal (todas las opps activas)</label>
+    <label>Cargar CSV exportado</label>
     <input type="file" id="csvFile" accept=".csv">
-    <label>CSV Perdidas (opcional)</label>
-    <input type="file" id="csvLost" accept=".csv">
-    <p class="hint">Exportar activas + perdidas por separado desde CRM</p>
+    <p class="hint">Filtro: Active is Yes OR Active is No</p>
   </div>
   
   <div class="cfg-section">
@@ -333,22 +331,6 @@ function parseDate(val) {
 // ═══════════════════════════════════════════════════════════════
 // CSV PARSING
 // ═══════════════════════════════════════════════════════════════
-let pendingMain = null;
-let pendingLost = null;
-
-function mergeAndProcess() {
-  // Merge main + lost data
-  let combined = [];
-  if (pendingMain) combined = combined.concat(pendingMain);
-  if (pendingLost) combined = combined.concat(pendingLost);
-  
-  if (combined.length > 0) {
-    STATE.data = combined;
-    processData();
-    recalcular();
-  }
-}
-
 document.getElementById('csvFile').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -357,28 +339,12 @@ document.getElementById('csvFile').addEventListener('change', (e) => {
     header: true,
     skipEmptyLines: true,
     complete: (results) => {
-      pendingMain = results.data;
-      mergeAndProcess();
+      STATE.data = results.data;
+      processData();
+      recalcular();
     },
     error: (err) => {
-      alert('Error al leer CSV principal: ' + err.message);
-    }
-  });
-});
-
-document.getElementById('csvLost').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  
-  Papa.parse(file, {
-    header: true,
-    skipEmptyLines: true,
-    complete: (results) => {
-      pendingLost = results.data;
-      mergeAndProcess();
-    },
-    error: (err) => {
-      alert('Error al leer CSV perdidas: ' + err.message);
+      alert('Error al leer CSV: ' + err.message);
     }
   });
 });
