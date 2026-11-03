@@ -114,8 +114,6 @@ probability
 partner_id/name
 partner_name
 contact_name
-email_from
-phone
 user_id/name
 team_id/name
 tag_ids/name
