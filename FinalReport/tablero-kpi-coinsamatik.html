@@ -26,7 +26,7 @@
 body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
 
 .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
-aside { background: var(--panel); color: white; padding: 20px; overflow-y: auto; }
+aside { background: var(--panel); color: white; padding: 20px; overflow: visible; position: relative; z-index: 50; }
 main { padding: 24px; overflow-y: auto; }
 
 .logo { text-align: center; margin-bottom: 24px; padding: 16px; background: white; border-radius: 12px; }
@@ -43,6 +43,11 @@ button { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weig
 .btn-secondary { background: #334155; color: #e2e8f0; }
 .btn-danger { background: #7f1d1d; color: white; }
 .hint { font-size: 11px; color: #64748b; margin-top: -4px; margin-bottom: 8px; }
+.help-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.help-wrap label { margin-bottom: 0; }
+.help-tip { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #334155; color: #e2e8f0; font-size: 11px; font-weight: 700; cursor: help; }
+.help-tip::after { content: attr(data-tip); display: none; position: absolute; left: 0; top: 22px; width: 260px; padding: 10px 12px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); font-size: 12px; font-weight: 400; line-height: 1.5; white-space: pre-line; z-index: 10; }
+.help-tip:hover::after { display: block; }
 
 .topbar { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
 .brand { display: flex; align-items: center; gap: 16px; }
@@ -135,7 +140,10 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
   
   <div class="cfg-section">
     <div class="cfg-title">Datos Odoo</div>
-    <label>Cargar CSV exportado</label>
+    <div class="help-wrap">
+      <label>Cargar CSV exportado</label>
+      <span class="help-tip" data-tip="Cómo cargar el archivo:&#10;1. En Odoo: CRM → Pipeline&#10;2. Filtro: Active is Yes OR Active is No&#10;3. Usa la plantilla TCC1&#10;4. Exporta en formato CSV&#10;5. Carga el archivo aquí">?</span>
+    </div>
     <input type="file" id="csvFile" accept=".csv">
     <p class="hint">Filtro: Active is Yes OR Active is No</p>
   </div>
@@ -157,7 +165,7 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
       <option value="mes">Mes actual</option>
       <option value="trimestre">Trimestre</option>
       <option value="anual">Año</option>
-      <option value="todo">Todo el dataset</option>
+      <option value="todo" selected>Todo el dataset</option>
     </select>
     <label>Equipo</label>
     <select id="equipo">
@@ -219,21 +227,37 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
   </div>
 
   <!-- Second KPI Row -->
-  <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="kpi-grid" style="grid-template-columns: repeat(2, 1fr);">
     <div class="kpi-card">
       <div class="kpi-label">Alertas</div>
       <div class="kpi-value" id="kpiAlertas">0</div>
       <div class="kpi-note">Opps sin actividad programada</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Perdidas</div>
-      <div class="kpi-value" id="kpiLost" style="color: var(--red);">$0</div>
-      <div class="kpi-note" id="kpiLostNote">0 oportunidades</div>
-    </div>
-    <div class="kpi-card">
       <div class="kpi-label">Ciclo Promedio</div>
       <div class="kpi-value" id="kpiCiclo">0 días</div>
       <div class="kpi-note">Tiempo promedio de cierre</div>
+    </div>
+  </div>
+
+  <!-- Third KPI Row - Sales/Accounting Link -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="kpi-card">
+      <div class="kpi-label">Pedidos Generados</div>
+      <div class="kpi-value" id="kpiOrders">$0</div>
+      <div class="kpi-note" id="kpiOrdersNote">Sum of Orders (Sales)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Quote-to-Order</div>
+      <div class="kpi-value" id="kpiQuoteOrder">0%</div>
+      <div class="kpi-note" id="kpiQuoteOrderNote">Pedidos / Expected Revenue</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiQuoteOrderBar" style="width: 0%"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Opps con Pedido</div>
+      <div class="kpi-value" id="kpiOrderCoverage">0%</div>
+      <div class="kpi-note" id="kpiOrderCoverageNote">Ganadas con orden creada</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill blue" id="kpiOrderCoverageBar" style="width: 0%"></div></div>
     </div>
   </div>
 
@@ -272,6 +296,34 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
       <div id="tablaClientes">
         <div class="no-data"><div class="no-data-icon">📊</div>Carga CSV para ver datos</div>
       </div>
+    </div>
+  </div>
+
+  <!-- Motivos y conversión -->
+  <div class="grid-2">
+    <div class="card">
+      <h2>Pérdidas <span>Total y motivos</span></h2>
+      <div class="kpi-value" id="kpiLost" style="color: var(--red); font-size: 22px;">$0</div>
+      <div class="kpi-note" id="kpiLostNote" style="margin-bottom: 8px;">0 oportunidades</div>
+      <div class="chart-container">
+        <canvas id="chartMotivos"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Conversión entre etapas <span>Aprox. · opps en o después de la etapa</span></h2>
+      <div id="tablaEtapas"></div>
+    </div>
+  </div>
+
+  <!-- Actividad y pronóstico -->
+  <div class="grid-2">
+    <div class="card">
+      <h2>Actividad del pipeline <span>Oportunidades abiertas</span></h2>
+      <div id="tablaActividad"></div>
+    </div>
+    <div class="card">
+      <h2>Pronóstico vs real <span>Por mes</span></h2>
+      <div id="tablaForecast"></div>
     </div>
   </div>
 
@@ -439,7 +491,13 @@ function calcularMetricas() {
     clientes: {},
     motivosPerdida: {},
     cicloPromedio: [],
-    ingVentas: 0
+    ingVentas: 0,
+    sumOfOrders: 0,
+    wonWithOrders: 0,
+    wonExpectedRev: 0,
+    actividad: { abiertas: 0, sinProgramar: 0, atrasada: 0, sin7: 0, sin15: 0 },
+    forecast: {},
+    real: {}
   };
   
   for (const r of filtered) {
@@ -465,20 +523,30 @@ function calcularMetricas() {
       }
     });
     
+    // Sum of Orders (from Sales module)
+    const sumOrders = parseNumber(r['Sum of Orders'] || r['Suma de pedidos'] || 0);
+    
     // Won deals
     if (isWon === 'won' || stage.toLowerCase() === 'cerrado') {
       metrics.totalVentas += revenue;
       metrics.wonCount++;
+      metrics.wonExpectedRev += revenue;
       metrics.vendedores[seller] = (metrics.vendedores[seller] || 0) + revenue;
       metrics.equipos[team] = (metrics.equipos[team] || 0) + revenue;
       metrics.clientes[customer] = (metrics.clientes[customer] || 0) + revenue;
+      
+      // Track orders for won deals
+      if (sumOrders > 0) {
+        metrics.sumOfOrders += sumOrders;
+        metrics.wonWithOrders++;
+      }
       
       if (daysToClose > 0) {
         metrics.cicloPromedio.push(daysToClose);
       }
       
       // Engineering sales
-      if (team.toLowerCase().includes('ingenieria') || team.toLowerCase() === 'sales') {
+      if (/ingenier/i.test(team)) {
         metrics.ingVentas += revenue;
       }
     }
@@ -511,6 +579,31 @@ function calcularMetricas() {
         metrics.sinActividad++;
       }
     }
+
+    // Pipeline activity status & aging (open opps only)
+    if (isWon === 'pending' && !isClosedStage) {
+      const a = metrics.actividad;
+      a.abiertas++;
+      const kanbanState = (r['Kanban State'] || '').toLowerCase();
+      if (kanbanState.includes('no next activity')) a.sinProgramar++;
+      if (kanbanState.includes('late')) a.atrasada++;
+      const lastAct = parseDate(r['Last Action']);
+      if (lastAct) {
+        const diasSin = (now - lastAct) / 86400000;
+        if (diasSin > 7) a.sin7++;
+        if (diasSin > 15) a.sin15++;
+      }
+    }
+
+    // Forecast (non-lost, by expected closing month) vs real (won, by closed month)
+    const ecMes = (r['Expected Closing'] || '').substring(0, 7);
+    if (/^\d{4}-\d{2}$/.test(ecMes) && isWon !== 'lost') {
+      metrics.forecast[ecMes] = (metrics.forecast[ecMes] || 0) + (proratedRev || revenue);
+    }
+    const cdMes = (r['Closed Date'] || '').substring(0, 7);
+    if (/^\d{4}-\d{2}$/.test(cdMes) && (isWon === 'won' || stage.toLowerCase() === 'cerrado')) {
+      metrics.real[cdMes] = (metrics.real[cdMes] || 0) + revenue;
+    }
   }
   
   // Calculate conversion rate
@@ -542,6 +635,7 @@ function recalcular() {
   
   renderKPIs(m);
   renderCharts(m);
+  renderNuevas(m);
   renderRPTGrid(m);
   renderExecReading(m);
 }
@@ -593,6 +687,22 @@ function renderKPIs(m) {
   
   // Cycle time
   document.getElementById('kpiCiclo').textContent = m.cicloPromedioVal.toFixed(1) + ' días';
+  
+  // Orders / Accounting link
+  document.getElementById('kpiOrders').textContent = fmt(m.sumOfOrders);
+  document.getElementById('kpiOrdersNote').textContent = `de ${m.wonWithOrders} opps ganadas`;
+  
+  // Quote-to-Order rate
+  const quoteToOrder = m.wonExpectedRev > 0 ? (m.sumOfOrders / m.wonExpectedRev) * 100 : 0;
+  document.getElementById('kpiQuoteOrder').textContent = fmtPct(quoteToOrder);
+  document.getElementById('kpiQuoteOrderNote').textContent = `${fmt(m.sumOfOrders)} / ${fmt(m.wonExpectedRev)}`;
+  document.getElementById('kpiQuoteOrderBar').style.width = Math.min(quoteToOrder, 100) + '%';
+  
+  // Order coverage (% of won opps with orders)
+  const orderCoverage = m.wonCount > 0 ? (m.wonWithOrders / m.wonCount) * 100 : 0;
+  document.getElementById('kpiOrderCoverage').textContent = fmtPct(orderCoverage);
+  document.getElementById('kpiOrderCoverageNote').textContent = `${m.wonWithOrders} de ${m.wonCount} ganadas`;
+  document.getElementById('kpiOrderCoverageBar').style.width = orderCoverage + '%';
 }
 
 function renderCharts(m) {
@@ -701,34 +811,90 @@ function renderCharts(m) {
   `;
 }
 
+function renderNuevas(m) {
+  // Motivos de pérdida
+  const motivos = Object.entries(m.motivosPerdida).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  STATE.charts.motivos = new Chart(document.getElementById('chartMotivos'), {
+    type: 'bar',
+    data: {
+      labels: motivos.map(x => x[0].substring(0, 30)),
+      datasets: [{ data: motivos.map(x => x[1]), backgroundColor: '#ef4444', borderRadius: 6 }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+
+  // Conversión entre etapas (aprox.: opps en la etapa o posteriores)
+  const orden = ['Nuevo', 'Contactado', 'Diagnóstico', 'Diseño', 'Cotizado', 'Seguimiento', 'Cerrado'];
+  const conteos = orden.map(e => m.etapas[e] || 0);
+  const sumDesde = (i) => conteos.slice(i).reduce((a, b) => a + b, 0);
+  const filasEtapas = orden.map((e, i) => {
+    const alcanzo = sumDesde(i);
+    const siguiente = i < orden.length - 1 ? sumDesde(i + 1) : null;
+    const conv = (siguiente !== null && alcanzo > 0) ? fmtPct(siguiente / alcanzo * 100) : '—';
+    return `<tr><td>${e}</td><td>${fmtN(alcanzo)}</td><td>${conv}</td></tr>`;
+  }).join('');
+  document.getElementById('tablaEtapas').innerHTML = `
+    <table>
+      <thead><tr><th>Etapa</th><th>Opps en o después</th><th>Pasa a la siguiente</th></tr></thead>
+      <tbody>${filasEtapas}</tbody>
+    </table>`;
+
+  // Actividad del pipeline
+  const a = m.actividad;
+  const pct = (x) => a.abiertas > 0 ? fmtPct(x / a.abiertas * 100) : '—';
+  const filasAct = [
+    ['Sin actividad programada', a.sinProgramar, pct(a.sinProgramar)],
+    ['Actividad atrasada', a.atrasada, pct(a.atrasada)],
+    ['Última acción hace >7 días', a.sin7, pct(a.sin7)],
+    ['Última acción hace >15 días', a.sin15, pct(a.sin15)]
+  ].map(f => `<tr><td>${f[0]}</td><td>${fmtN(f[1])}</td><td>${f[2]}</td></tr>`).join('');
+  document.getElementById('tablaActividad').innerHTML = `
+    <table>
+      <thead><tr><th>Indicador</th><th>Opps</th><th>% de abiertas (${fmtN(a.abiertas)})</th></tr></thead>
+      <tbody>${filasAct}</tbody>
+    </table>`;
+
+  // Pronóstico vs real por mes
+  const meses = [...new Set([...Object.keys(m.forecast), ...Object.keys(m.real)])].sort().slice(-12);
+  const filasFc = meses.map(mes => {
+    const f = m.forecast[mes] || 0;
+    const r = m.real[mes] || 0;
+    const desv = r > 0 ? fmtPct(Math.abs(f - r) / r * 100) : '—';
+    return `<tr><td>${mes}</td><td>${fmt(f)}</td><td>${fmt(r)}</td><td>${desv}</td></tr>`;
+  }).join('');
+  document.getElementById('tablaForecast').innerHTML = `
+    <table>
+      <thead><tr><th>Mes</th><th>Pronóstico</th><th>Real</th><th>Desviación</th></tr></thead>
+      <tbody>${filasFc || '<tr><td colspan="4">Sin datos</td></tr>'}</tbody>
+    </table>`;
+}
+
 function renderRPTGrid(m) {
   const reports = [
     { code: 'RPT-01', name: 'Ventas equipo vs meta', status: 'available', getValue: m => fmt(m?.totalVentas || 0) },
     { code: 'RPT-02', name: 'Ventas por marca', status: 'available', getValue: m => Object.keys(m?.marcas || {}).length + ' marcas' },
-    { code: 'RPT-03', name: 'Margen contribución', status: 'out-of-scope', getValue: () => '⛔ Requiere costos' },
-    { code: 'RPT-04', name: 'Cobranza en tiempo', status: 'config', getValue: () => '📊 Ver Contabilidad' },
+    { code: 'RPT-04', name: 'Cobranza en tiempo', status: 'available', getValue: () => '✅ Ver Contabilidad' },
     { code: 'RPT-05', name: 'Tasa conversión embudo', status: 'available', getValue: m => fmtPct(m?.conversionRate || 0) },
-    { code: 'RPT-06', name: 'Visitas cumplimiento', status: 'config', getValue: () => '🔧 Requiere actividad Visita' },
+    { code: 'RPT-06', name: 'Visitas cumplimiento', status: 'available', getValue: () => '✅ Ver Actividades' },
     { code: 'RPT-07', name: 'Nuevas oportunidades', status: 'available', getValue: m => fmtN(m?.totalOpps || 0) + ' opps' },
-    { code: 'RPT-08', name: 'NPS cliente externo', status: 'out-of-scope', getValue: () => '⛔ Sin encuesta' },
     { code: 'RPT-09', name: 'Ventas por vendedor', status: 'available', getValue: m => Object.keys(m?.vendedores || {}).length + ' vendedores' },
     { code: 'RPT-10', name: 'Ventas marca/vendedor', status: 'available', getValue: m => '✅ Ver gráfico' },
     { code: 'RPT-11', name: 'Ventas Ingeniería', status: 'available', getValue: m => fmt(m?.ingVentas || 0) },
     { code: 'RPT-12', name: 'Ventas tipo solución', status: 'config', getValue: () => '🔧 Campo Studio pendiente' },
-    { code: 'RPT-13', name: 'Margen proyectos', status: 'out-of-scope', getValue: () => '⛔ Sin costos' },
-    { code: 'RPT-14', name: 'Proyectos en tiempo', status: 'out-of-scope', getValue: () => '⛔ Sin módulo Proyectos' },
-    { code: 'RPT-15', name: 'Tasa garantías', status: 'out-of-scope', getValue: () => '⛔ Sin Helpdesk' },
-    { code: 'RPT-16', name: 'Hand-offs ingeniería', status: 'config', getValue: () => '🔧 Ver actividades' },
+    { code: 'RPT-16', name: 'Hand-offs ingeniería', status: 'available', getValue: () => '✅ Ver Actividades' },
     { code: 'RPT-17', name: 'Ciclo de venta', status: 'available', getValue: m => (m?.cicloPromedioVal || 0).toFixed(1) + ' días' },
     { code: 'RPT-18', name: 'Opps sin actividad', status: 'available', getValue: m => fmtN(m?.sinActividad || 0) + ' opps' },
-    { code: 'RPT-19', name: 'Tiempo entrega cotización', status: 'config', getValue: () => '📊 Ver Ventas' },
+    { code: 'RPT-19', name: 'Tiempo entrega cotización', status: 'available', getValue: () => '✅ Ver Presupuestos' },
     { code: 'RPT-20', name: 'Pipeline coverage', status: 'available', getValue: m => ((m?.pipelineVal || 0) / STATE.meta.mensual).toFixed(1) + 'x' },
-    { code: 'RPT-21', name: 'Forecast accuracy', status: 'pending', getValue: () => '⏳ Requiere histórico' },
-    { code: 'RPT-22', name: 'Eval cliente interno', status: 'out-of-scope', getValue: () => '⛔ Fase II' },
+    { code: 'RPT-21', name: 'Forecast accuracy', status: 'available', getValue: () => '✅ Ver Pronóstico' },
     { code: 'RPT-23', name: 'Actividades CRM', status: 'available', getValue: m => '✅ Ver en Odoo' },
     { code: 'RPT-24', name: 'Pérdidas por motivo', status: 'available', getValue: m => fmtN(m?.lostCount || 0) + ' perdidas' },
-    { code: 'RPT-25', name: 'Respuesta técnica', status: 'out-of-scope', getValue: () => '⛔ Sin Helpdesk' },
-    { code: 'RPT-26', name: '% Proyectos retraso', status: 'out-of-scope', getValue: () => '⛔ Sin Proyectos' },
   ];
   
   document.getElementById('rptGrid').innerHTML = reports.map(r => `

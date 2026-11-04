@@ -46,6 +46,12 @@
 - **Perdidas:** Total revenue perdido con conteo de opps
 - **Ciclo Promedio:** Días promedio para cerrar
 
+### FEAT-06: KPIs de enlace Sales/Accounting
+Usando el campo `Sum of Orders` del CRM (viene de `sale.order`):
+- **Pedidos Generados:** Total de pedidos creados desde opps ganadas
+- **Quote-to-Order:** % de conversión entre Expected Revenue y pedidos reales
+- **Opps con Pedido:** % de opps ganadas que tienen orden creada (compliance)
+
 ---
 
 ## 🟡 Mejoras Pendientes
@@ -84,3 +90,21 @@ Esto incluye oportunidades activas + perdidas en un solo archivo.
 |-------|---------|--------|
 | 2026-11-03 | v1.0 | Dashboard inicial |
 | 2026-11-03 | v1.1 | Fix conversión, doble métrica, KPIs adicionales |
+| 2026-11-03 | v1.2 | KPIs de enlace Sales/Accounting (Sum of Orders) |
+| 2026-11-03 | v1.3 | Estados de RPT alineados con reportes-tracker.md; archivos movidos a FinalReport |
+| 2026-11-03 | v1.4 | Motivos de pérdida, conversión entre etapas, actividad del pipeline (aging), pronóstico vs real; fix atribución Ingeniería |
+
+---
+
+## v1.4 Detalle
+- **Motivos de pérdida:** gráfica de `Lost Reason/Description` (RPT-24)
+- **Conversión entre etapas (aprox.):** opps en la etapa o posteriores, y % que pasa a la siguiente (RPT-05)
+- **Actividad del pipeline:** sin actividad programada, actividad atrasada (`Kanban State`), última acción >7 y >15 días (RPT-18)
+- **Pronóstico vs real:** pronóstico = `Prorated Revenue` por mes de `Expected Closing` (excluye perdidas); real = `Expected Revenue` de ganadas por mes de `Closed Date` (RPT-21)
+- **Fix Ingeniería:** antes sumaba el equipo "Sales" como ingeniería; ahora solo equipos que contengan "ingenier" (sin equipo de ingeniería en el export actual, RPT-11 mostrará 0)
+
+### Pendientes conocidos
+- BUG-01 logo real
+- BUG-05 cliente OPERADORA DE MINAS
+- FEAT-02 dropdown de Vista sin función
+- Cobranza y margen requieren datos de Contabilidad/costos (fuera de alcance CRM)
