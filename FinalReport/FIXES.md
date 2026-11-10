@@ -71,7 +71,8 @@ Usando el campo `Sum of Orders` del CRM (viene de `sale.order`):
 ### FEAT-10: Instrucciones de carga siempre visibles
 - Los pasos de export (antes en tooltip `?`) ahora son un bloque numerado visible en el sidebar, bajo el input de archivo.
 
-### FEAT-11: Metas desde Presupuesto 2026
+### FEAT-11: Metas desde Presupuesto 2026 — ⏸️ PAUSADO (2026-11-10)
+- **Estado:** la UI está comentada en el HTML (origen de meta, factor USD→MXN y modal "Ver metas y cálculo") para posible reuso posterior. El JSON `PRESUPUESTO_2026` y las funciones JS quedan embebidos; la rama de presupuesto en `calcularMetaInfo()` queda inactiva (fuente fija en manual). Para reactivar: descomentar el sidebar, el modal, los listeners y restaurar `const source` en `calcularMetaInfo`.
 - `parse_presupuesto.py` parsea "Presupuesto Coinsamatik 2026.xlsx" (vendedor × 12 meses) y genera el JSON `PRESUPUESTO_2026` embebido en el dashboard; matching de nombres presupuesto→Odoo (11/13 exactos; MANUEL A. HERNANDEZ y JESUS A. LOPEZ no están en el export actual).
 - Select de origen de meta: "Presupuesto 2026" (default) o "Manual". Con presupuesto: meta = suma de los meses que cubre el filtro activo × factor de conversión (default 18, USD→MXN, ajustable); acotada al equipo si hay filtro de equipo. Columnas "Meta" y "vs Meta" por vendedor y equipo en la tabla de FEAT-09.
 - Moneda del presupuesto: **USD, confirmado por el cliente**. El factor de conversión a MXN es editable (default 18).
