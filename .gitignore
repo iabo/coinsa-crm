@@ -1,2 +1,12 @@
 yabo
 notas-perdidas
+
+# Datasets
+FinalReport/*.csv
+
+# Docs / notes
+notasCapa
+INSTRUCTIVO_CAPACITACION_CRM_COINSAMATIK.html
+
+# macOS
+.DS_Store
