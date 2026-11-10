@@ -130,6 +130,42 @@ th { font-weight: 600; color: var(--muted); text-transform: uppercase; font-size
 
 footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px; }
 
+/* Instrucciones de carga visibles (sidebar) */
+.upload-steps { margin-top: 10px; font-size: 11px; color: #94a3b8; line-height: 1.55; }
+.upload-steps ol { margin: 6px 0 0 16px; padding: 0; }
+.upload-steps li { margin-bottom: 3px; }
+.upload-steps em { font-style: normal; color: #cbd5e1; }
+
+/* Rango de fechas en topbar */
+.range-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.range-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+.range-bar input[type="date"] { width: auto; margin-bottom: 0; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: white; color: var(--text); font-size: 12px; }
+.range-sep { color: var(--muted); font-size: 12px; }
+.range-static { font-size: 12px; font-weight: 600; color: var(--text); }
+
+/* Tabla jerárquica equipo → vendedor */
+tr.team-total td { font-weight: 700; background: #f1f5f9; }
+tr.team-total td:first-child { text-transform: uppercase; font-size: 10px; letter-spacing: 0.04em; }
+tr.seller-row td:first-child { padding-left: 24px; color: var(--muted); }
+tr.seller-row td { font-size: 11px; }
+
+/* Banner de instantánea estática */
+.snapshot-banner { background: var(--panel); color: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 12px; line-height: 1.6; }
+.snapshot-banner strong { color: var(--accent2); }
+
+/* Modal de metas */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 100; align-items: center; justify-content: center; }
+.modal-backdrop.open { display: flex; }
+.modal { background: var(--card); color: var(--text); border-radius: 16px; width: min(760px, 92vw); max-height: 86vh; overflow-y: auto; padding: 20px 22px; box-shadow: 0 24px 64px rgba(0,0,0,0.35); }
+.modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.modal-close { width: auto; margin: 0; padding: 4px 10px; background: #e2e8f0; color: var(--text); border-radius: 8px; font-size: 13px; }
+.meta-calc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+.meta-calc b { color: var(--text); }
+.meta-calc ul { margin: 6px 0 0 18px; padding: 0; }
+.meta-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+.meta-summary .cell { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 12px; }
+.meta-summary .cell b { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 2px; }
+
 @media (max-width: 1200px) {
   .kpi-grid, .rpt-grid { grid-template-columns: repeat(2, 1fr); }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
@@ -151,17 +187,37 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
 <aside>
   
   <div class="cfg-section">
-    <div class="help-wrap">
-      <label>Cargar CSV exportado</label>
-      <span class="help-tip" data-tip="Cómo cargar el archivo:&#10;1. En Odoo: CRM → Pipeline&#10;2. Filtro: Active is Yes OR Active is No&#10;3. Usa la plantilla TCC1&#10;4. Exporta en formato CSV&#10;5. Carga el archivo aquí">?</span>
-    </div>
+    <div class="cfg-title">Cargar CSV exportado</div>
     <input type="file" id="csvFile" accept=".csv">
+    <div class="upload-steps">
+      <div class="cfg-title" style="margin-top: 10px;">Cómo exportar desde Odoo</div>
+      <ol>
+        <li>En Odoo: CRM → Pipeline</li>
+        <li>Filtro: <em>Active is Yes OR Active is No</em></li>
+        <li>Usa la plantilla TCC1</li>
+        <li>Exporta en formato CSV</li>
+        <li>Carga el archivo aquí</li>
+      </ol>
+    </div>
   </div>
   
   <div class="cfg-section">
     <div class="cfg-title">Metas</div>
-    <label>Meta mensual (MXN)</label>
-    <input type="number" id="metaMensual" value="6000000">
+    <label>Origen de la meta</label>
+    <select id="metaSource">
+      <option value="presupuesto" selected>Presupuesto 2026</option>
+      <option value="manual">Manual</option>
+    </select>
+    <div id="metaPresupuestoWrap">
+      <label>Factor presupuesto → MXN</label>
+      <input type="number" id="metaFactor" value="18" step="0.5">
+      <div class="hint">Convierte el presupuesto 2026 (USD) a MXN. Default 18.</div>
+    </div>
+    <div id="metaManualWrap" style="display:none;">
+      <label>Meta mensual (MXN)</label>
+      <input type="number" id="metaMensual" value="6000000">
+    </div>
+    <button class="btn-secondary" onclick="mostrarMetas()" style="margin-top: 4px;">Ver metas y cálculo</button>
   </div>
   
   <div class="cfg-section">
@@ -172,6 +228,7 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
       <option value="trimestre">Trimestre</option>
       <option value="anual">Año</option>
       <option value="todo" selected>Todo el dataset</option>
+      <option value="personalizado">Personalizado (fechas)</option>
     </select>
     <label>Equipo</label>
     <select id="equipo">
@@ -181,7 +238,7 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
   
   <div class="cfg-section">
     <button class="btn-primary" onclick="recalcular()">Recalcular</button>
-    <button class="btn-secondary" onclick="window.print()">Exportar PDF</button>
+    <button class="btn-secondary" onclick="guardarInstantanea()">Guardar</button>
     <button class="btn-danger" onclick="limpiarDatos()">Limpiar datos</button>
   </div>
 </aside>
@@ -194,6 +251,12 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
         <h1>Tablero Comercial</h1>
         <div class="sub">KPIs Comerciales · COINSA-MATIK · Odoo CRM</div>
       </div>
+    </div>
+    <div class="range-bar">
+      <span class="range-label">Rango de datos</span>
+      <input type="date" id="fechaDesde" title="Fecha inicial del filtro">
+      <span class="range-sep">→</span>
+      <input type="date" id="fechaHasta" title="Fecha final del filtro">
     </div>
   </div>
 
@@ -289,14 +352,17 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
     </div>
   </div>
 
-  <!-- Second Row -->
-  <div class="grid-3">
-    <div class="card">
-      <h2><span class="title-with-help">Ventas por Equipo <span class="card-help" tabindex="0" data-tip="Ventas cerradas agrupadas por equipo de ventas." aria-label="Explicación de Ventas por Equipo">?</span></span></h2>
-      <div class="chart-container">
-        <canvas id="chartEquipos"></canvas>
-      </div>
+  <!-- Ventas por Equipo y Vendedor: row propio con más altura -->
+  <div class="card" style="margin-bottom: 20px;">
+    <h2><span class="title-with-help">Ventas por Equipo y Vendedor <span class="card-help" tabindex="0" data-tip="Ventas cerradas agrupadas por equipo de ventas, con el desglose del aporte de cada vendedor dentro de su equipo." aria-label="Explicación de Ventas por Equipo y Vendedor">?</span></span></h2>
+    <div class="chart-container" style="height: 360px;">
+      <canvas id="chartEquipoVendedor"></canvas>
     </div>
+    <div id="tablaEquipoVendedor" style="margin-top: 12px; max-height: 420px; overflow-y: auto;"></div>
+  </div>
+
+  <!-- Embudo + Top Clientes -->
+  <div class="grid-2">
     <div class="card">
       <h2><span class="title-with-help">Embudo por Etapa <span class="card-help" tabindex="0" data-tip="Cantidad de oportunidades que se encuentran en cada etapa del proceso comercial." aria-label="Explicación de Embudo por Etapa">?</span></span></h2>
       <div class="chart-container">
@@ -348,14 +414,29 @@ footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px
 </main>
 </div>
 
+<div class="modal-backdrop" id="modalMetas" onclick="if (event.target === this) cerrarMetas()">
+  <div class="modal">
+    <h2>Metas de venta <button class="modal-close" onclick="cerrarMetas()">✕</button></h2>
+    <div id="modalMetasBody"></div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
+// Presupuesto 2026 por vendedor y mes. Generado con parse_presupuesto.py desde
+// "Presupuesto Coinsamatik 2026.xlsx"; "odoo" es el nombre exacto del vendedor
+// en Odoo tras el matching (null = no está en el export actual). Valores en USD
+// (confirmado con el cliente); se convierten a MXN con el factor del sidebar.
+var PRESUPUESTO_2026 = {"anio":2026,"meses":["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"],"company":[393000,475000,515500,520500,525500,535500,545500,540500,555500,540500,545500,327500],"vendedores":[{"presupuesto":"JOEL A. URQUIDEZ ESPINOZA","odoo":"JOEL A. URQUIDEZ ESPINOZA","meses":[5000,10000,10000,10000,15000,20000,20000,25000,25000,25000,25000,10000]},{"presupuesto":"MANUEL ALEJANDRO HERNANDEZ PACHECO","odoo":null,"meses":[5000,10000,15000,20000,30000,20000,30000,20000,30000,25000,25000,20000]},{"presupuesto":"HERMENEGILDO GARCIA","odoo":"HERMENEGILDO GARCIA","meses":[90000,90000,80000,90000,80000,90000,80000,90000,80000,90000,80000,60000]},{"presupuesto":"JORGE LUIS CORRAL ZAYAS","odoo":"JORGE LUIS CORRAL ZAYAS","meses":[50000,60000,60000,60000,60000,60000,60000,60000,60000,60000,70000,40000]},{"presupuesto":"JESUS ARNOLDO LOPEZ MONTOYA","odoo":null,"meses":[30000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,20000]},{"presupuesto":"MIGUEL GAYTAN","odoo":"MIGUEL F. GAYTAN ANDRADE","meses":[30000,30000,40000,40000,40000,40000,40000,40000,40000,40000,40000,30000]},{"presupuesto":"DANIEL FLORES","odoo":"DANIEL A. FLORES HERNANDEZ","meses":[15000,20000,20000,20000,20000,30000,20000,20000,30000,20000,20000,15000]},{"presupuesto":"MIRIAM VALENZUELA CONS","odoo":"MIRIAM VALENZUELA CONS","meses":[60000,70000,80000,70000,80000,70000,80000,70000,80000,70000,80000,40000]},{"presupuesto":"ROSA MARIA ESTRADA NAMBO","odoo":"ROSA MARIA ESTRADA NAMBO","meses":[3000,5000,5500,5500,5500,5500,5500,5500,5500,5500,5500,2500]},{"presupuesto":"GUILLERMO ANGULO IVICH","odoo":"GUILLERMO ANGULO IVICH","meses":[40000,40000,50000,50000,50000,50000,60000,60000,60000,50000,60000,30000]},{"presupuesto":"HECTOR GARCIA","odoo":"HECTOR GARCIA","meses":[15000,35000,40000,35000,40000,35000,40000,35000,40000,35000,35000,15000]},{"presupuesto":"EDWIN MARIO JACOBO CABRERA","odoo":"EDWIN MARIO JACOBO CABRERA","meses":[30000,40000,50000,50000,40000,50000,40000,50000,40000,50000,40000,30000]},{"presupuesto":"DAVID SANTIAGO OCHOA TORRES","odoo":"DAVID SANTIAGO OCHOA TORRES","meses":[20000,25000,25000,30000,25000,25000,30000,25000,25000,30000,25000,15000]}]};
+
 const STATE = {
   data: null,
   parsed: null,
   charts: {},
+  datasetRange: null,
+  sellerTeam: {},
   meta: {
     anual: 72000000,
     mensual: 6000000
@@ -379,6 +460,28 @@ function parseDate(val) {
   // Handle "2026-11-03 09:10:39" format
   const d = new Date(val.replace(' ', 'T'));
   return isNaN(d.getTime()) ? null : d;
+}
+
+const toISODate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const monthKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+function monthsBetween(startISO, endISO) {
+  const out = [];
+  if (!startISO || !endISO || startISO > endISO) return out;
+  let [y, m] = startISO.split('-').map(Number);
+  const [y2, m2] = endISO.split('-').map(Number);
+  while (y < y2 || (y === y2 && m <= m2)) {
+    out.push(`${y}-${String(m).padStart(2, '0')}`);
+    m++;
+    if (m > 12) { m = 1; y++; }
+  }
+  return out;
+}
+
+function resetFechas() {
+  if (!STATE.datasetRange) return;
+  document.getElementById('fechaDesde').value = STATE.datasetRange.min;
+  document.getElementById('fechaHasta').value = STATE.datasetRange.max;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -506,6 +609,33 @@ function processData() {
   [...teams].sort().forEach(t => {
     equipoSelect.innerHTML += `<option value="${t}">${t}</option>`;
   });
+  
+  // Vendedor → equipo (el más frecuente), para metas del presupuesto
+  const sellerTeamCount = {};
+  consolidated.forEach(r => {
+    const seller = r['Salesperson/Name'] || r['Vendedor/Nombre'] || '';
+    const team = r['Sales Team/Sales Team'] || r['Equipo de ventas/Equipo de ventas'] || '';
+    if (seller && team) {
+      if (!sellerTeamCount[seller]) sellerTeamCount[seller] = {};
+      sellerTeamCount[seller][team] = (sellerTeamCount[seller][team] || 0) + 1;
+    }
+  });
+  STATE.sellerTeam = {};
+  for (const seller in sellerTeamCount) {
+    STATE.sellerTeam[seller] = Object.entries(sellerTeamCount[seller]).sort((a, b) => b[1] - a[1])[0][0];
+  }
+  
+  // Rango de fechas del dataset (Created on) → datepickers del topbar
+  let minD = null, maxD = null;
+  consolidated.forEach(r => {
+    const d = parseDate(r['Created on'] || r['Creado el']);
+    if (d) {
+      if (!minD || d < minD) minD = d;
+      if (!maxD || d > maxD) maxD = d;
+    }
+  });
+  STATE.datasetRange = (minD && maxD) ? { min: toISODate(minD), max: toISODate(maxD) } : null;
+  resetFechas();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -533,6 +663,13 @@ function calcularMetricas() {
       return rq === q && created.getFullYear() === now.getFullYear();
     } else if (periodo === 'anual') {
       return created.getFullYear() === now.getFullYear();
+    } else if (periodo === 'personalizado') {
+      const desdeVal = document.getElementById('fechaDesde').value;
+      const hastaVal = document.getElementById('fechaHasta').value;
+      if (!desdeVal || !hastaVal) return true;
+      const d0 = new Date(desdeVal + 'T00:00:00');
+      const d1 = new Date(hastaVal + 'T23:59:59');
+      return created >= d0 && created <= d1;
     }
     return true; // 'todo'
   });
@@ -545,6 +682,23 @@ function calcularMetricas() {
     });
   }
   
+  // Meses que cubre el filtro activo (para metas del presupuesto)
+  const windowMonths = (() => {
+    if (periodo === 'mes') return [monthKey(now)];
+    if (periodo === 'trimestre') {
+      const q = Math.floor(now.getMonth() / 3) * 3;
+      return [0, 1, 2].map(i => monthKey(new Date(now.getFullYear(), q + i, 1)));
+    }
+    if (periodo === 'anual') {
+      return Array.from({ length: 12 }, (_, i) => monthKey(new Date(now.getFullYear(), i, 1)));
+    }
+    if (periodo === 'personalizado') {
+      return monthsBetween(document.getElementById('fechaDesde').value, document.getElementById('fechaHasta').value);
+    }
+    return monthsBetween(STATE.datasetRange ? STATE.datasetRange.min : null,
+                         STATE.datasetRange ? STATE.datasetRange.max : null);
+  })();
+  
   // Calculate metrics
   const metrics = {
     totalVentas: 0,
@@ -556,6 +710,8 @@ function calcularMetricas() {
     sinActividad: 0,
     vendedores: {},
     equipos: {},
+    equiposVendedores: {},
+    windowMonths,
     etapas: {},
     marcas: {},
     clientes: {},
@@ -622,6 +778,8 @@ function calcularMetricas() {
       metrics.wonExpectedRev += revenue;
       metrics.vendedores[seller] = (metrics.vendedores[seller] || 0) + revenue;
       metrics.equipos[team] = (metrics.equipos[team] || 0) + revenue;
+      if (!metrics.equiposVendedores[team]) metrics.equiposVendedores[team] = {};
+      metrics.equiposVendedores[team][seller] = (metrics.equiposVendedores[team][seller] || 0) + revenue;
       metrics.clientes[customer] = (metrics.clientes[customer] || 0) + revenue;
       
       // Track orders for won deals
@@ -710,19 +868,67 @@ function calcularMetricas() {
 // ═══════════════════════════════════════════════════════════════
 // RENDERING
 // ═══════════════════════════════════════════════════════════════
-function recalcular() {
-  // Update meta from inputs
-  STATE.meta.mensual = parseNumber(document.getElementById('metaMensual').value);
-  STATE.meta.anual = STATE.meta.mensual * 12;
+function calcularMetaInfo(m) {
+  const source = document.getElementById('metaSource').value;
+  const periodo = document.getElementById('periodo').value;
+  const equipo = document.getElementById('equipo').value;
+  const info = { source: source, mensual: 0, metaRef: 0, porVendedor: null, porEquipo: null, label: null };
   
+  if (source === 'presupuesto' && window.PRESUPUESTO_2026) {
+    const P = PRESUPUESTO_2026;
+    const factor = parseNumber(document.getElementById('metaFactor').value) || 1;
+    const monthIdx = (mk) => {
+      const parts = mk.split('-').map(Number);
+      return (parts[0] === P.anio) ? parts[1] - 1 : -1;
+    };
+    const meses = (m.windowMonths || []).filter(mk => monthIdx(mk) >= 0);
+    if (meses.length === 0) {
+      // El filtro activo no cubre meses del año del presupuesto → meta manual
+    } else {
+    // Meta por vendedor (solo los matched con Odoo), para el desglose F3
+    const porVendedor = {};
+    (P.vendedores || []).forEach(v => {
+      if (!v.odoo) return;
+      const total = meses.reduce((s, mk) => s + (v.meses[monthIdx(mk)] || 0), 0) * factor;
+      porVendedor[v.odoo] = (porVendedor[v.odoo] || 0) + total;
+    });
+    // Meta por equipo = suma de las metas de sus vendedores
+    const porEquipo = {};
+    for (const seller in porVendedor) {
+      const team = STATE.sellerTeam[seller];
+      if (team) porEquipo[team] = (porEquipo[team] || 0) + porVendedor[seller];
+    }
+    const companyTotal = meses.reduce((s, mk) => s + ((P.company && P.company[monthIdx(mk)]) || 0), 0) * factor;
+    info.metaRef = (equipo !== 'todos' && porEquipo[equipo] != null) ? porEquipo[equipo] : companyTotal;
+    info.mensual = meses.length > 0 ? info.metaRef / meses.length : 0;
+    info.porVendedor = porVendedor;
+    info.porEquipo = porEquipo;
+    info.label = `Presupuesto ${P.anio}${equipo !== 'todos' ? ' · ' + equipo : ''} · ${meses.length} ${meses.length === 1 ? 'mes' : 'meses'}`;
+    return info;
+    }
+  }
+  
+  // Manual (comportamiento original)
+  const mensual = parseNumber(document.getElementById('metaMensual').value);
+  let metaRef = mensual;
+  if (periodo === 'trimestre') metaRef = mensual * 3;
+  else if (periodo === 'anual') metaRef = mensual * 12;
+  info.mensual = mensual;
+  info.metaRef = metaRef;
+  return info;
+}
+
+function recalcular() {
   const m = calcularMetricas();
   if (!m) {
     renderNoData();
     return;
   }
-  
-  renderKPIs(m);
-  renderCharts(m);
+  const metaInfo = calcularMetaInfo(m);
+  STATE.meta.mensual = metaInfo.mensual;
+  STATE.meta.anual = metaInfo.mensual * 12;
+  renderKPIs(m, metaInfo);
+  renderCharts(m, metaInfo);
   renderNuevas(m);
 }
 
@@ -732,22 +938,20 @@ function renderNoData() {
   document.getElementById('kpiConversion').textContent = '0%';
 }
 
-function renderKPIs(m) {
-  const periodo = document.getElementById('periodo').value;
-  let metaRef = STATE.meta.mensual;
-  if (periodo === 'trimestre') metaRef = STATE.meta.mensual * 3;
-  else if (periodo === 'anual') metaRef = STATE.meta.anual;
+function renderKPIs(m, metaInfo) {
+  const metaRef = metaInfo.metaRef;
   
   // Ventas vs Meta
   document.getElementById('kpiVentas').textContent = fmt(m.totalVentas);
-  document.getElementById('kpiVentasNote').textContent = `Meta: ${fmt(metaRef)}`;
+  document.getElementById('kpiVentasNote').textContent = `Meta: ${fmt(metaRef)}` + (metaInfo.label ? ` · ${metaInfo.label}` : '');
   const ventasPct = Math.min((m.totalVentas / metaRef) * 100, 100);
   document.getElementById('kpiVentasBar').style.width = ventasPct + '%';
   
   // Pipeline
   document.getElementById('kpiPipeline').textContent = fmt(m.pipelineVal);
   const coverage = STATE.meta.mensual > 0 ? m.pipelineVal / STATE.meta.mensual : 0;
-  document.getElementById('kpiPipelineNote').textContent = `Cobertura: ${coverage.toFixed(1)}x`;
+  const coverageTxt = (coverage > 0 && coverage < 1) ? coverage.toFixed(2) : coverage.toFixed(1);
+  document.getElementById('kpiPipelineNote').textContent = `Cobertura: ${coverageTxt}x`;
   document.getElementById('kpiPipelineBar').style.width = Math.min(coverage / 5 * 100, 100) + '%';
   
   // Conversion (count-based)
@@ -787,7 +991,7 @@ function renderKPIs(m) {
   document.getElementById('kpiOrderCoverageBar').style.width = orderCoverage + '%';
 }
 
-function renderCharts(m) {
+function renderCharts(m, metaInfo) {
   // Destroy existing charts
   Object.values(STATE.charts).forEach(c => c.destroy());
   STATE.charts = {};
@@ -838,27 +1042,43 @@ function renderCharts(m) {
     }
   });
   
-  // Equipos chart
-  const equiposSorted = Object.entries(m.equipos).sort((a, b) => b[1] - a[1]);
-  STATE.charts.equipos = new Chart(document.getElementById('chartEquipos'), {
+  // Equipo + vendedor: barras apiladas y tabla jerárquica
+  const eqv = m.equiposVendedores || {};
+  const teamNames = Object.entries(eqv)
+    .map(([team, sellers]) => [team, Object.values(sellers).reduce((a, b) => a + b, 0)])
+    .sort((a, b) => b[1] - a[1])
+    .map(t => t[0]);
+  const sellerNames = [...new Set(teamNames.flatMap(t => Object.keys(eqv[t])))].sort();
+  const palette = ['#90b508', '#3b82f6', '#f59e0b', '#06b6d4', '#8b5cf6', '#ef4444', '#22c55e', '#f97316', '#14b8a6', '#a855f7', '#64748b', '#eab308', '#fb7185'];
+  const shortName = (s) => {
+    const parts = s.split(' ');
+    return parts[0] + (parts.length > 2 ? ' ' + parts[parts.length - 2][0] + '.' : '');
+  };
+  STATE.charts.equipoVendedor = new Chart(document.getElementById('chartEquipoVendedor'), {
     type: 'bar',
     data: {
-      labels: equiposSorted.map(v => v[0].substring(0, 15)),
-      datasets: [{
-        data: equiposSorted.map(v => v[1]),
-        backgroundColor: ['#90b508', '#3b82f6', '#f59e0b', '#06b6d4'],
-        borderRadius: 6
-      }]
+      labels: teamNames.map(t => t.length > 15 ? t.substring(0, 15) : t),
+      datasets: sellerNames.map((s, i) => ({
+        label: shortName(s),
+        data: teamNames.map(t => eqv[t][s] || 0),
+        backgroundColor: palette[i % palette.length],
+        borderRadius: 3
+      }))
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+        tooltip: { callbacks: { label: c => `${sellerNames[c.datasetIndex]}: ${fmt(c.parsed.y)}` } }
+      },
       scales: {
-        y: { ticks: { callback: v => '$' + (v/1000000).toFixed(1) + 'M' } }
+        x: { stacked: true },
+        y: { stacked: true, ticks: { callback: v => '$' + (v/1000000).toFixed(1) + 'M' } }
       }
     }
   });
+  renderTablaEquipoVendedor(m, metaInfo);
   
   // Embudo chart
   const stageOrder = ['Nuevo', 'Contactado', 'Diagnóstico', 'Diseño', 'Cotizado', 'Seguimiento', 'Cerrado'];
@@ -1059,21 +1279,216 @@ function renderBottleneck(m) {
 function limpiarDatos() {
   STATE.data = null;
   STATE.parsed = null;
+  STATE.datasetRange = null;
+  STATE.sellerTeam = {};
   document.getElementById('csvFile').value = '';
+  document.getElementById('fechaDesde').value = '';
+  document.getElementById('fechaHasta').value = '';
   Object.values(STATE.charts).forEach(c => c.destroy());
   STATE.charts = {};
   renderNoData();
   document.getElementById('tablaClientes').innerHTML = '<div class="no-data"><div class="no-data-icon">📊</div>Carga CSV para ver datos</div>';
+  document.getElementById('tablaEquipoVendedor').innerHTML = '';
 }
 
 function toggleSidebar() {
   document.querySelector('.app').classList.toggle('sidebar-hidden');
 }
 
+function renderTablaEquipoVendedor(m, metaInfo) {
+  const eqv = m.equiposVendedores || {};
+  const conMeta = !!(metaInfo && metaInfo.porVendedor);
+  const entries = Object.entries(eqv)
+    .map(([team, sellers]) => ({
+      team,
+      sellers: Object.entries(sellers).sort((a, b) => b[1] - a[1]),
+      total: Object.values(sellers).reduce((a, b) => a + b, 0)
+    }))
+    .sort((a, b) => b.total - a.total);
+  
+  const el = document.getElementById('tablaEquipoVendedor');
+  if (entries.length === 0) {
+    el.innerHTML = '<div class="no-data" style="height: 80px;">Sin ventas cerradas en el período</div>';
+    return;
+  }
+  
+  let html = `<table>
+    <thead><tr><th>Equipo / Vendedor</th><th>Ventas</th>${conMeta ? '<th>Meta</th><th>vs Meta</th>' : ''}<th>% del equipo</th></tr></thead>
+    <tbody>`;
+  for (const e of entries) {
+    const metaEq = (conMeta && metaInfo.porEquipo) ? (metaInfo.porEquipo[e.team] || 0) : 0;
+    html += `<tr class="team-total"><td>${e.team}</td><td>${fmt(e.total)}</td>`;
+    if (conMeta) {
+      html += `<td>${metaEq > 0 ? fmt(metaEq) : '—'}</td><td>${metaEq > 0 ? fmtPct(e.total / metaEq * 100) : '—'}</td>`;
+    }
+    html += `<td>100%</td></tr>`;
+    for (const [seller, ventas] of e.sellers) {
+      const metaV = conMeta ? (metaInfo.porVendedor[seller] || 0) : 0;
+      html += `<tr class="seller-row"><td>${seller}</td><td>${fmt(ventas)}</td>`;
+      if (conMeta) {
+        html += `<td>${metaV > 0 ? fmt(metaV) : '—'}</td><td>${metaV > 0 ? fmtPct(ventas / metaV * 100) : '—'}</td>`;
+      }
+      html += `<td>${fmtPct(ventas / e.total * 100)}</td></tr>`;
+    }
+  }
+  el.innerHTML = html + '</tbody></table>';
+}
+
+function guardarInstantanea() {
+  if (!STATE.parsed) {
+    alert('Carga un CSV primero para generar la instantánea.');
+    return;
+  }
+  const stamp = new Date();
+  const desde = document.getElementById('fechaDesde').value || '—';
+  const hasta = document.getElementById('fechaHasta').value || '—';
+  const periodoTxt = document.getElementById('periodo').selectedOptions[0].textContent;
+  const equipoSel = document.getElementById('equipo');
+  const equipoTxt = equipoSel.value === 'todos' ? 'Todos los equipos' : equipoSel.selectedOptions[0].textContent;
+  const metaTxt = document.getElementById('metaSource').value === 'presupuesto'
+    ? `Presupuesto 2026 (factor ×${document.getElementById('metaFactor').value || 1})`
+    : `Manual: ${fmt(parseNumber(document.getElementById('metaMensual').value))} / mes`;
+  
+  const mainClone = document.querySelector('main').cloneNode(true);
+  
+  // Quitar interactividad del clon
+  const brandClone = mainClone.querySelector('.brand');
+  if (brandClone) { brandClone.removeAttribute('onclick'); brandClone.style.cursor = 'default'; }
+  const rangeBar = mainClone.querySelector('.range-bar');
+  if (rangeBar) {
+    rangeBar.innerHTML = `<span class="range-label">Rango de datos</span><span class="range-static">${desde} → ${hasta}</span>`;
+  }
+  
+  // Congelar gráficas como imágenes
+  Object.values(STATE.charts).forEach(chart => {
+    const canvasEl = mainClone.querySelector('canvas#' + chart.canvas.id);
+    if (canvasEl) {
+      const img = document.createElement('img');
+      img.src = chart.toBase64Image();
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'contain';
+      canvasEl.replaceWith(img);
+    }
+  });
+  
+  // Banner con el contexto de la instantánea
+  const banner = document.createElement('div');
+  banner.className = 'snapshot-banner';
+  banner.innerHTML = `<strong>Instantánea estática</strong> · Generada: ${stamp.toLocaleString('es-MX')}<br>` +
+    `Rango: ${desde} → ${hasta} · Período: ${periodoTxt} · Equipo: ${equipoTxt} · Meta: ${metaTxt}`;
+  mainClone.prepend(banner);
+  
+  const css = document.querySelector('style').outerHTML;
+  const html = `<!DOCTYPE html>\n<html lang="es">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Instantánea · Tablero KPI COINSA-MATIK · ${toISODate(stamp)}</title>\n${css}\n</head>\n<body>\n<div class="app" style="grid-template-columns: 1fr;">\n${mainClone.outerHTML}\n</div>\n</body>\n</html>`;
+  
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `instantanea-tablero-${toISODate(stamp)}-${String(stamp.getHours()).padStart(2, '0')}${String(stamp.getMinutes()).padStart(2, '0')}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 // Initialize
 document.getElementById('metaMensual').addEventListener('change', recalcular);
-document.getElementById('periodo').addEventListener('change', recalcular);
+document.getElementById('periodo').addEventListener('change', (e) => {
+  if (e.target.value !== 'personalizado') resetFechas();
+  recalcular();
+});
 document.getElementById('equipo').addEventListener('change', recalcular);
+document.getElementById('fechaDesde').addEventListener('change', onFechaChange);
+document.getElementById('fechaHasta').addEventListener('change', onFechaChange);
+document.getElementById('metaSource').addEventListener('change', onMetaSourceChange);
+document.getElementById('metaFactor').addEventListener('change', recalcular);
+
+function onFechaChange() {
+  if (!STATE.datasetRange) return;
+  document.getElementById('periodo').value = 'personalizado';
+  recalcular();
+}
+
+function onMetaSourceChange() {
+  const source = document.getElementById('metaSource').value;
+  document.getElementById('metaManualWrap').style.display = source === 'manual' ? '' : 'none';
+  document.getElementById('metaPresupuestoWrap').style.display = source === 'presupuesto' ? '' : 'none';
+  recalcular();
+}
+
+function cerrarMetas() {
+  document.getElementById('modalMetas').classList.remove('open');
+}
+
+function mostrarMetas() {
+  const m = calcularMetricas();
+  if (!m) {
+    alert('Carga un CSV primero para ver las metas.');
+    return;
+  }
+  const metaInfo = calcularMetaInfo(m);
+  const fmtUsd = (n) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0);
+  const desde = document.getElementById('fechaDesde').value || '—';
+  const hasta = document.getElementById('fechaHasta').value || '—';
+  const periodoTxt = document.getElementById('periodo').selectedOptions[0].textContent;
+  const equipoSel = document.getElementById('equipo');
+  const equipoTxt = equipoSel.value === 'todos' ? 'Todos los equipos' : equipoSel.selectedOptions[0].textContent;
+  let body = `<div class="meta-summary">
+    <div class="cell"><b>Origen de la meta</b>${metaInfo.source === 'presupuesto' ? 'Presupuesto ' + PRESUPUESTO_2026.anio : 'Manual'}</div>
+    <div class="cell"><b>Meta aplicada ahora</b>${fmt(metaInfo.metaRef)}</div>
+    <div class="cell"><b>Filtros activos</b>${periodoTxt} · ${equipoTxt}</div>
+    <div class="cell"><b>Rango de datos</b>${desde} → ${hasta}</div>
+  </div>`;
+  
+  if (metaInfo.source === 'presupuesto' && metaInfo.porVendedor) {
+    const P = PRESUPUESTO_2026;
+    const factor = parseNumber(document.getElementById('metaFactor').value) || 1;
+    const meses = (m.windowMonths || []).filter(mk => mk.split('-')[0] === String(P.anio));
+    const rangoMeses = meses.length > 0 ? `${meses[0]} → ${meses[meses.length - 1]}` : '—';
+    const sinMatch = (P.vendedores || []).filter(v => !v.odoo).map(v => v.presupuesto);
+    body += `<div class="meta-calc">
+      <b>Cómo se calcula</b>
+      <ul>
+        <li>Presupuesto ${P.anio} por vendedor × mes (USD), del Excel "Presupuesto Coinsamatik 2026.xlsx" (parseado con <b>parse_presupuesto.py</b>).</li>
+        <li>Ventana activa: <b>${meses.length} ${meses.length === 1 ? 'mes' : 'meses'}</b> de ${P.anio} (${rangoMeses}). Solo cuentan los meses de ${P.anio} dentro del filtro.</li>
+        <li>Meta compañía (MXN) = suma del presupuesto mensual (USD) de la ventana × factor <b>${factor}</b>.</li>
+        <li>Meta por vendedor = su presupuesto de la ventana × factor. Meta por equipo = suma de las metas de sus vendedores (según el equipo más frecuente de cada vendedor en el dataset).</li>
+        ${sinMatch.length ? `<li>Sin meta individual (sin match en el export actual): <b>${sinMatch.join(', ')}</b>. Su presupuesto sí cuenta en la meta de compañía.</li>` : ''}
+      </ul>
+    </div>`;
+    
+    const rows = (P.vendedores || []).map(v => {
+      const usd = meses.reduce((s, mk) => {
+        const idx = Number(mk.split('-')[1]) - 1;
+        return s + (v.meses[idx] || 0);
+      }, 0);
+      return { nombre: v.odoo || v.presupuesto + ' (sin match)', equipo: v.odoo ? (STATE.sellerTeam[v.odoo] || '—') : '—', usd, mxn: v.odoo ? usd * factor : null };
+    }).sort((a, b) => (b.mxn || 0) - (a.mxn || 0));
+    const companyUsd = meses.reduce((s, mk) => {
+      const idx = Number(mk.split('-')[1]) - 1;
+      return s + ((P.company && P.company[idx]) || 0);
+    }, 0);
+    body += `<table>
+      <thead><tr><th>Vendedor</th><th>Equipo (dataset)</th><th>Presupuesto ventana (USD)</th><th>Meta (MXN)</th></tr></thead>
+      <tbody>
+        ${rows.map(r => `<tr><td>${r.nombre}</td><td>${r.equipo}</td><td>${fmtUsd(r.usd)}</td><td>${r.mxn != null ? fmt(r.mxn) : '—'}</td></tr>`).join('')}
+        <tr class="team-total"><td>COMPAÑÍA</td><td>—</td><td>${fmtUsd(companyUsd)}</td><td>${fmt(companyUsd * factor)}</td></tr>
+      </tbody>
+    </table>`;
+  } else {
+    const mensual = parseNumber(document.getElementById('metaMensual').value);
+    const periodo = document.getElementById('periodo').value;
+    body += `<div class="meta-calc">
+      <b>Cómo se calcula</b>
+      <ul>
+        <li>Meta manual: <b>${fmt(mensual)}</b> mensuales${periodo === 'trimestre' ? ' × 3 (trimestre)' : periodo === 'anual' ? ' × 12 (año)' : ''}.</li>
+        ${metaInfo.source === 'presupuesto' ? '<li>El filtro activo no cubre meses de ' + PRESUPUESTO_2026.anio + ', por lo que se usa la meta manual como respaldo.</li>' : ''}
+      </ul>
+    </div>`;
+  }
+  
+  document.getElementById('modalMetasBody').innerHTML = body;
+  document.getElementById('modalMetas').classList.add('open');
+}
 
 </script>
 </body>

@@ -10,3 +10,6 @@ INSTRUCTIVO_CAPACITACION_CRM_COINSAMATIK.html
 
 # macOS
 .DS_Store
+
+# Office lock files
+~$*
