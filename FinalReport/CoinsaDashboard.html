@@ -384,6 +384,75 @@ function parseDate(val) {
 // ═══════════════════════════════════════════════════════════════
 // CSV PARSING
 // ═══════════════════════════════════════════════════════════════
+
+// Odoo traduce encabezados y valores al idioma de la interfaz.
+// Normalizamos exports en español al esquema canónico (inglés).
+const HEADER_MAP = {
+  'Oportunidad': 'Opportunity',
+  'Etapa/Nombre de la etapa': 'Stage/Stage Name',
+  'Etapa/Nombre de etapa': 'Stage/Stage Name',
+  'Tipo': 'Type',
+  'Activo': 'Active',
+  'Ganado': 'Is Won',
+  'Es Ganado': 'Is Won',
+  'Estado de kanban': 'Kanban State',
+  'Prioridad': 'Priority',
+  'Ingreso esperado': 'Expected Revenue',
+  'Ingreso prorrateado': 'Prorated Revenue',
+  'Suma de órdenes': 'Sum of Orders',
+  'Probabilidad': 'Probability',
+  'Cliente/Nombre': 'Customer/Name',
+  'Nombre de la empresa': 'Company Name',
+  'Nombre del contacto': 'Contact Name',
+  'Vendedor/Nombre': 'Salesperson/Name',
+  'Equipo de ventas/Equipo de ventas': 'Sales Team/Sales Team',
+  'Etiquetas/Nombre de etiqueta': 'Tags/Tag Name',
+  'Creado el': 'Created on',
+  'Cierre esperado': 'Expected Closing',
+  'Fecha de cierre': 'Closed Date',
+  'Última actualización de la etapa': 'Last Stage Update',
+  'Última acción': 'Last Action',
+  'Fecha de asignación': 'Assignment Date',
+  'Días a asignar': 'Days to Assign',
+  'Días para el cierre': 'Days to Close',
+  'Motivo de pérdida/Descripción': 'Lost Reason/Description',
+  'Origen/Nombre de la fuente': 'Source/Source Name',
+  'Medio/Nombre de medio': 'Medium/Medium Name',
+  'Campaña/Identificador de campañas': 'Campaign/Campaign Identifier',
+  'Recomendado por': 'Referred By',
+  'Resumen de la siguiente actividad': 'Next Activity Summary',
+  'Fecha límite de mi actividad': 'My Activity Deadline'
+};
+
+const IS_WON_MAP = { 'Ganado': 'Won', 'Pendiente': 'Pending', 'Perdido': 'Lost' };
+
+const KANBAN_MAP = {
+  'No hay siguiente actividad planeada': 'No next activity planned',
+  'Siguiente actividad atrasada': 'Next activity late',
+  'Siguiente actividad planeada': 'Next activity planned'
+};
+
+const STAGE_MAP = { 'Ingeniería': 'Diseño', 'Ingenieria': 'Diseño' };
+
+function normalizarExport(rows) {
+  return rows.map(row => {
+    const out = {};
+    for (const key in row) {
+      const canonical = HEADER_MAP[key] || key;
+      let value = row[key];
+      if (canonical === 'Is Won') {
+        value = IS_WON_MAP[(value || '').trim()] || value;
+      } else if (canonical === 'Kanban State') {
+        value = KANBAN_MAP[(value || '').trim()] || value;
+      } else if (canonical === 'Stage/Stage Name') {
+        value = (STAGE_MAP[(value || '').trim()] || (value || '').trim()).replace(/\s+\d+%$/, '');
+      }
+      out[canonical] = value;
+    }
+    return out;
+  });
+}
+
 document.getElementById('csvFile').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -392,7 +461,7 @@ document.getElementById('csvFile').addEventListener('change', (e) => {
     header: true,
     skipEmptyLines: true,
     complete: (results) => {
-      STATE.data = results.data;
+      STATE.data = normalizarExport(results.data);
       processData();
       recalcular();
     },

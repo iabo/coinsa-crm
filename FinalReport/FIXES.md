@@ -34,6 +34,11 @@
 - **Descripción:** "OPERADORA DE MINAS E INST" no encontrado en Odoo
 - **Causa posible:** Nombre truncado en CSV o filtros diferentes
 
+### BUG-06: Export en español no muestra datos
+- **Estado:** ✅ FIXED
+- **Causa raíz:** Odoo traduce encabezados y valores al idioma de la UI. 32 de 35 columnas cambian de nombre (`Ganado` → `Is Won`, `Ingreso esperado` → `Expected Revenue`, etc.), además de los valores: `Won/Pending/Lost` ↔ `Ganado/Pendiente/Perdido`, etapas con sufijo de probabilidad (`Cotizado 70%`) y estados de kanban.
+- **Solución:** Función `normalizarExport()` en la carga del CSV: mapea encabezados ES→EN, normaliza `Is Won`, `Kanban State` y etapas (elimina sufijo ` NN%`, `Ingeniería` → `Diseño`). Ambos idiomas producen el mismo tablero.
+
 ---
 
 ## 🟢 Features Implementados
@@ -93,6 +98,7 @@ Esto incluye oportunidades activas + perdidas en un solo archivo.
 | 2026-11-03 | v1.2 | KPIs de enlace Sales/Accounting (Sum of Orders) |
 | 2026-11-03 | v1.3 | Estados de RPT alineados con reportes-tracker.md; archivos movidos a FinalReport |
 | 2026-11-03 | v1.4 | Motivos de pérdida, conversión entre etapas, actividad del pipeline (aging), pronóstico vs real; fix atribución Ingeniería |
+| 2026-11-10 | v1.5 | Fix BUG-06: normalización de exports de Odoo en español (encabezados, Is Won, Kanban State, etapas) |
 
 ---
 
