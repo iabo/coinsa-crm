@@ -66,6 +66,7 @@ button { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weig
 .toolbar select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: white; color: var(--text); min-width: 140px; }
 
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.kpi-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
 .kpi-card { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
 .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
 .title-with-help { display: inline; }
@@ -167,7 +168,7 @@ tr.seller-row td { font-size: 11px; }
 .meta-summary .cell b { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 2px; }
 
 @media (max-width: 1200px) {
-  .kpi-grid, .rpt-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-grid, .kpi-grid.cols-5, .rpt-grid { grid-template-columns: repeat(2, 1fr); }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
 }
 @media (max-width: 900px) {
@@ -238,6 +239,10 @@ tr.seller-row td { font-size: 11px; }
     <select id="equipo">
       <option value="todos">Todos los equipos</option>
     </select>
+    <label>Vendedor</label>
+    <select id="vendedor">
+      <option value="todos">Todos los vendedores</option>
+    </select>
   </div>
   
   <div class="cfg-section">
@@ -293,7 +298,7 @@ tr.seller-row td { font-size: 11px; }
   </div>
 
   <!-- Second KPI Row - Sales/Accounting Link -->
-  <div class="kpi-grid">
+  <div class="kpi-grid cols-5">
     <div class="kpi-card">
       <div class="kpi-label"><span class="title-with-help">Ciclo Promedio <span class="card-help" tabindex="0" data-tip="Promedio de días transcurridos para cerrar las oportunidades ganadas." aria-label="Explicación de Ciclo Promedio">?</span></span></div>
       <div class="kpi-value" id="kpiCiclo">0 días</div>
@@ -315,6 +320,12 @@ tr.seller-row td { font-size: 11px; }
       <div class="kpi-value" id="kpiOrderCoverage">0%</div>
       <div class="kpi-note" id="kpiOrderCoverageNote">Ganadas con orden creada</div>
       <div class="kpi-bar"><div class="kpi-bar-fill blue" id="kpiOrderCoverageBar" style="width: 0%"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="title-with-help">Conversión (Todas) <span class="card-help" tabindex="0" data-tip="Porcentaje de oportunidades ganadas respecto de TODAS las oportunidades del filtro, incluyendo las abiertas (no solo ganadas vs perdidas)." aria-label="Explicación de Conversión total">?</span></span></div>
+      <div class="kpi-value" id="kpiConversionTotal">0%</div>
+      <div class="kpi-note" id="kpiConversionTotalNote">0 de 0 opps (incl. abiertas)</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill green" id="kpiConversionTotalBar" style="width: 0%"></div></div>
     </div>
   </div>
 
@@ -616,6 +627,18 @@ function processData() {
     equipoSelect.innerHTML += `<option value="${t}">${t}</option>`;
   });
   
+  // Populate seller filter
+  const sellers = new Set();
+  consolidated.forEach(r => {
+    const seller = (r['Salesperson/Name'] || r['Vendedor/Nombre'] || '').trim();
+    sellers.add(seller || 'Sin asignar');
+  });
+  const vendedorSelect = document.getElementById('vendedor');
+  vendedorSelect.innerHTML = '<option value="todos">Todos los vendedores</option>';
+  [...sellers].sort().forEach(s => {
+    vendedorSelect.innerHTML += `<option value="${s}">${s}</option>`;
+  });
+  
   // Vendedor → equipo (el más frecuente), para metas del presupuesto
   const sellerTeamCount = {};
   consolidated.forEach(r => {
@@ -688,6 +711,15 @@ function calcularMetricas() {
     });
   }
   
+  // Filter by seller
+  const vendedor = document.getElementById('vendedor').value;
+  if (vendedor !== 'todos') {
+    filtered = filtered.filter(r => {
+      const s = r['Salesperson/Name'] || r['Vendedor/Nombre'] || 'Sin asignar';
+      return s === vendedor;
+    });
+  }
+  
   // Meses que cubre el filtro activo (para metas del presupuesto)
   const windowMonths = (() => {
     if (periodo === 'mes') return [monthKey(now)];
@@ -757,7 +789,7 @@ function calcularMetricas() {
     const nextActivity = r['Next Activity Summary'] || r['Actividades'] || '';
     const daysToClose = parseNumber(r['Days to Close'] || r['Días para cerrar']);
     const lostReason = r['Lost Reason/Description'] || r['Motivo de pérdida/Descripción'] || '';
-    const won = isWon === 'won' || stage.toLowerCase() === 'cerrado';
+    const won = isWon === 'won'; // Is Won es autoritativo: hay opps perdidas asentadas en etapa 'Cerrado'
 
     addSegment(metrics.margenes, r['Margen de utilidad'], won, revenue);
     addSegment(metrics.sectores, r['Sector'], won, revenue);
@@ -768,7 +800,7 @@ function calcularMetricas() {
     tags.forEach(tag => {
       if (tag.startsWith('MARCA:')) {
         const marca = tag.replace('MARCA:', '').trim();
-        if (isWon === 'won' || stage.toLowerCase() === 'cerrado') {
+        if (isWon === 'won') {
           metrics.marcas[marca] = (metrics.marcas[marca] || 0) + revenue;
         }
       }
@@ -825,22 +857,16 @@ function calcularMetricas() {
       metrics.etapas[stage] = (metrics.etapas[stage] || 0) + 1;
     }
     
-    // No activity planned
-    if (!nextActivity || nextActivity.trim() === '') {
-      const kanban = r['Kanban State'] || '';
-      if (kanban.toLowerCase().includes('no next activity')) {
-        metrics.sinActividad++;
-      }
-    }
-
-    // Pipeline activity status & aging (open opps only)
+    // Alertas de actividad — solo opps abiertas (pending fuera de etapas cerradas).
+    // Es la ÚNICA fuente del número grande de alertas y de la tabla, para que siempre cuadren.
     if (isWon === 'pending' && !isClosedStage) {
       const a = metrics.actividad;
       a.abiertas++;
       const kanbanState = (r['Kanban State'] || '').toLowerCase();
-      if (kanbanState.includes('no next activity')) a.sinProgramar++;
-      if (kanbanState.includes('late')) a.atrasada++;
-      const lastAct = parseDate(r['Last Action']);
+      if (kanbanState.includes('no next activity') || kanbanState.includes('sin siguiente actividad')) a.sinProgramar++;
+      if (kanbanState.includes('late') || kanbanState.includes('atrasada') || kanbanState.includes('vencida')) a.atrasada++;
+      // Último seguimiento: Last Action si viene; si no, Last Stage Update (en el export actual Last Action viene vacío)
+      const lastAct = parseDate(r['Last Action'] || r['Last Stage Update']);
       if (lastAct) {
         const diasSin = (now - lastAct) / 86400000;
         if (diasSin > 7) a.sin7++;
@@ -862,6 +888,8 @@ function calcularMetricas() {
   // Calculate conversion rate
   const totalCerradas = metrics.wonCount + metrics.lostCount;
   metrics.conversionRate = totalCerradas > 0 ? (metrics.wonCount / totalCerradas) * 100 : 0;
+  // El número grande de alertas usa la misma fuente que la tabla (opps abiertas sin actividad programada)
+  metrics.sinActividad = metrics.actividad.sinProgramar;
   
   // Calculate average cycle
   metrics.cicloPromedioVal = metrics.cicloPromedio.length > 0 
@@ -997,6 +1025,12 @@ function renderKPIs(m, metaInfo) {
   document.getElementById('kpiOrderCoverage').textContent = fmtPct(orderCoverage);
   document.getElementById('kpiOrderCoverageNote').textContent = `${m.wonWithOrders} de ${m.wonCount} ganadas`;
   document.getElementById('kpiOrderCoverageBar').style.width = orderCoverage + '%';
+  
+  // Conversion over ALL opportunities (incl. open)
+  const conversionTotal = m.totalOpps > 0 ? (m.wonCount / m.totalOpps) * 100 : 0;
+  document.getElementById('kpiConversionTotal').textContent = fmtPct(conversionTotal);
+  document.getElementById('kpiConversionTotalNote').textContent = `${fmtN(m.wonCount)} de ${fmtN(m.totalOpps)} opps (incl. abiertas)`;
+  document.getElementById('kpiConversionTotalBar').style.width = conversionTotal + '%';
 }
 
 function renderCharts(m, metaInfo) {
@@ -1212,8 +1246,8 @@ function renderNuevas(m) {
   const filasAct = [
     ['🚨 Sin actividad programada', a.sinProgramar, pct(a.sinProgramar)],
     ['⏰ Actividad atrasada', a.atrasada, pct(a.atrasada)],
-    ['📅 Última acción hace >7 días', a.sin7, pct(a.sin7)],
-    ['📅 Última acción hace >15 días', a.sin15, pct(a.sin15)]
+    ['📅 Sin seguimiento hace >7 días', a.sin7, pct(a.sin7)],
+    ['📅 Sin seguimiento hace >15 días', a.sin15, pct(a.sin15)]
   ].map(f => `<tr><td>${f[0]}</td><td>${fmtN(f[1])}</td><td>${f[2]}</td></tr>`).join('');
   document.getElementById('tablaActividad').innerHTML = `
     <div style="margin-bottom: 12px; font-size: 22px; font-weight: 700; color: var(--amber);">${fmtN(m.sinActividad)} alertas</div>
@@ -1290,6 +1324,8 @@ function limpiarDatos() {
   STATE.datasetRange = null;
   STATE.sellerTeam = {};
   document.getElementById('csvFile').value = '';
+  document.getElementById('vendedor').innerHTML = '<option value="todos">Todos los vendedores</option>';
+  document.getElementById('equipo').innerHTML = '<option value="todos">Todos los equipos</option>';
   document.getElementById('fechaDesde').value = '';
   document.getElementById('fechaHasta').value = '';
   Object.values(STATE.charts).forEach(c => c.destroy());
@@ -1353,6 +1389,8 @@ function guardarInstantanea() {
   const periodoTxt = document.getElementById('periodo').selectedOptions[0].textContent;
   const equipoSel = document.getElementById('equipo');
   const equipoTxt = equipoSel.value === 'todos' ? 'Todos los equipos' : equipoSel.selectedOptions[0].textContent;
+  const vendedorSel = document.getElementById('vendedor');
+  const vendedorTxt = vendedorSel.value === 'todos' ? 'Todos los vendedores' : vendedorSel.selectedOptions[0].textContent;
   // Pausado: origen presupuesto/factor desactivado; la meta activa es la manual
   const metaTxt = `Manual: ${fmt(parseNumber(document.getElementById('metaMensual').value))} / mes`;
   
@@ -1383,7 +1421,7 @@ function guardarInstantanea() {
   const banner = document.createElement('div');
   banner.className = 'snapshot-banner';
   banner.innerHTML = `<strong>Instantánea estática</strong> · Generada: ${stamp.toLocaleString('es-MX')}<br>` +
-    `Rango: ${desde} → ${hasta} · Período: ${periodoTxt} · Equipo: ${equipoTxt} · Meta: ${metaTxt}`;
+    `Rango: ${desde} → ${hasta} · Período: ${periodoTxt} · Equipo: ${equipoTxt} · Vendedor: ${vendedorTxt} · Meta: ${metaTxt}`;
   mainClone.prepend(banner);
   
   const css = document.querySelector('style').outerHTML;
@@ -1404,6 +1442,7 @@ document.getElementById('periodo').addEventListener('change', (e) => {
   recalcular();
 });
 document.getElementById('equipo').addEventListener('change', recalcular);
+document.getElementById('vendedor').addEventListener('change', recalcular);
 document.getElementById('fechaDesde').addEventListener('change', onFechaChange);
 document.getElementById('fechaHasta').addEventListener('change', onFechaChange);
 // Pausado (reutilizar después): listeners del origen de meta y factor USD→MXN

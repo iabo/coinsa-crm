@@ -39,6 +39,16 @@
 - **Causa raíz:** Odoo traduce encabezados y valores al idioma de la UI. 32 de 35 columnas cambian de nombre (`Ganado` → `Is Won`, `Ingreso esperado` → `Expected Revenue`, etc.), además de los valores: `Won/Pending/Lost` ↔ `Ganado/Pendiente/Perdido`, etapas con sufijo de probabilidad (`Cotizado 70%`) y estados de kanban.
 - **Solución:** Función `normalizarExport()` en la carga del CSV: mapea encabezados ES→EN, normaliza `Is Won`, `Kanban State` y etapas (elimina sufijo ` NN%`, `Ingeniería` → `Diseño`). Ambos idiomas producen el mismo tablero.
 
+### BUG-07: Número de alertas no cuadraba con la tabla
+- **Estado:** ✅ FIXED
+- **Causa raíz:** el número grande de alertas contaba TODAS las opps sin actividad (incluidas ganadas/perdidas), mientras la tabla contaba solo opps abiertas — dos fuentes distintas. Además `Last Action` viene vacío en todo el export actual, por lo que ">7 días / >15 días" siempre daba 0.
+- **Solución:** única fuente de verdad: alertas calculadas solo para opps abiertas (Pending fuera de etapas cerradas); el número grande = fila "Sin actividad programada" de la tabla. El aging usa `Last Action` o, en su defecto, `Last Stage Update`; filas renombradas a "Sin seguimiento hace >N días".
+
+### BUG-08: Opps perdidas contadas como ganadas
+- **Estado:** ✅ FIXED
+- **Causa raíz:** `won` se definía como `Is Won = Won` **O** etapa "Cerrado". Había 3 opps perdidas asentadas en la etapa "Cerrado" que se sumaban como ganadas (ventas, conversión y rankings inflados).
+- **Solución:** `Is Won` es la fuente autoritativa; se eliminó el fallback a etapa. Aplica también al Mix por Marca.
+
 ---
 
 ## 🟢 Features Implementados
@@ -78,6 +88,12 @@ Usando el campo `Sum of Orders` del CRM (viene de `sale.order`):
 - Moneda del presupuesto: **USD, confirmado por el cliente**. El factor de conversión a MXN es editable (default 18).
 - Botón "Ver metas y cálculo" en el sidebar: modal con el origen de la meta, filtros/ventana activos, explicación del cálculo y tabla vendedor → equipo con presupuesto (USD) y meta (MXN) de la ventana, más el total de compañía.
 
+### FEAT-12: Conversión sobre TODAS las oportunidades
+- Nueva tarjeta "Conversión (Todas)": ganadas / total de opps del filtro (incluye abiertas), junto a las existentes por cerradas (opps y revenue).
+
+### FEAT-13: Filtro por vendedor
+- Select "Vendedor" en Filtros (sidebar), combinable con equipo y período. Recalcula todas las métricas, KPIs, gráficas y tablas para una sola persona. Incluido en el banner de la instantánea.
+
 ---
 
 ## 🟡 Mejoras Pendientes
@@ -88,6 +104,10 @@ Usando el campo `Sum of Orders` del CRM (viene de `sale.order`):
 ### FEAT-02: Vista por rol funcional
 - **Estado:** Pendiente
 - **Descripción:** El dropdown de vistas no hace nada actualmente
+
+### Metas de venta (reactivar FEAT-11) — dirección acordada 2026-11-11
+- **Decisión:** enfoque híbrido a implementar y evaluar sobre la marcha: **meta global de compañía** (derivada del presupuesto 2026, promediada o por rangos) + **categorías de vendedor** (junior / senior / Sonora / foraneo, etc.) en lugar del presupuesto exacto por vendedor × mes. El mix por marca queda pospuesto.
+- El JSON `PRESUPUESTO_2026` embebido y `parse_presupuesto.py` siguen disponibles como fuente para derivar las categorías y la meta de compañía.
 
 ### FEAT-03: Logo real del cliente
 - **Estado:** Pendiente archivo del cliente
@@ -121,6 +141,7 @@ Esto incluye oportunidades activas + perdidas en un solo archivo.
 | 2026-11-03 | v1.4 | Motivos de pérdida, conversión entre etapas, actividad del pipeline (aging), pronóstico vs real; fix atribución Ingeniería |
 | 2026-11-10 | v1.5 | Fix BUG-06: normalización de exports de Odoo en español (encabezados, Is Won, Kanban State, etapas) |
 | 2026-11-10 | v1.6 | Features reunión stakeholders: instantánea HTML (FEAT-07), rango de fechas + datepicker (FEAT-08), ventas equipo→vendedor (FEAT-09), instrucciones visibles (FEAT-10), metas desde Presupuesto 2026 (FEAT-11) |
+| 2026-11-11 | v1.7 | Retro presentación: fix alertas (BUG-07), fix ganadas/perdidas por etapa (BUG-08), Conversión (Todas) (FEAT-12), filtro por vendedor (FEAT-13) |
 
 ---
 
