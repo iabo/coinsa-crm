@@ -1,6 +1,6 @@
 # Tablero KPI COINSA-MATIK - Fixes & Issues
 
-## Status: v1.1 - Funcional
+## Status: v1.8 - Funcional
 
 ---
 
@@ -81,18 +81,18 @@ Usando el campo `Sum of Orders` del CRM (viene de `sale.order`):
 ### FEAT-10: Instrucciones de carga siempre visibles
 - Los pasos de export (antes en tooltip `?`) ahora son un bloque numerado visible en el sidebar, bajo el input de archivo.
 
-### FEAT-11: Metas desde Presupuesto 2026 — ⏸️ PAUSADO (2026-11-10)
-- **Estado:** la UI está comentada en el HTML (origen de meta, factor USD→MXN y modal "Ver metas y cálculo") para posible reuso posterior. El JSON `PRESUPUESTO_2026` y las funciones JS quedan embebidos; la rama de presupuesto en `calcularMetaInfo()` queda inactiva (fuente fija en manual). Para reactivar: descomentar el sidebar, el modal, los listeners y restaurar `const source` en `calcularMetaInfo`.
-- `parse_presupuesto.py` parsea "Presupuesto Coinsamatik 2026.xlsx" (vendedor × 12 meses) y genera el JSON `PRESUPUESTO_2026` embebido en el dashboard; matching de nombres presupuesto→Odoo (11/13 exactos; MANUEL A. HERNANDEZ y JESUS A. LOPEZ no están en el export actual).
-- Select de origen de meta: "Presupuesto 2026" (default) o "Manual". Con presupuesto: meta = suma de los meses que cubre el filtro activo × factor de conversión (default 18, USD→MXN, ajustable); acotada al equipo si hay filtro de equipo. Columnas "Meta" y "vs Meta" por vendedor y equipo en la tabla de FEAT-09.
-- Moneda del presupuesto: **USD, confirmado por el cliente**. El factor de conversión a MXN es editable (default 18).
-- Botón "Ver metas y cálculo" en el sidebar: modal con el origen de la meta, filtros/ventana activos, explicación del cálculo y tabla vendedor → equipo con presupuesto (USD) y meta (MXN) de la ventana, más el total de compañía.
+### FEAT-11: Metas desde Presupuesto 2026 — ✅ IMPLEMENTADO (enfoque híbrido estático, 2026-11-11)
+- **Diseño:** en lugar del presupuesto exacto por vendedor × mes (demasiados moving parts), metas **estáticas embebidas** (`METAS_2026` en el HTML): meta mensual de compañía **$9,000,000** (≈ presupuesto 6.02M USD/año × 18) + **categorías de vendedor** con meta fija mensual: Senior $1,400,000 (HERMENEGILDO GARCIA, MIRIAM VALENZUELA), Semi-senior $800,000 (CORRAL, ANGULO, JACOBO, GAYTAN, LOPEZ), Junior $420,000 (H. GARCIA, OCHOA, HERNANDEZ, FLORES, URQUIDEZ), Soporte $90,000 (ESTRADA). Asignación inicial por magnitud de presupuesto promedio; se edita a mano en el HTML, sin cálculo runtime.
+- KPI "Ventas vs Meta": meta de la selección activa — vendedor → meta de su categoría; equipo → suma de las metas de sus vendedores (según dataset); compañía → input editable. Escala ×3/×12 para trimestre/año. Selección sin metas asignadas → "Sin meta definida para esta selección".
+- Tabla FEAT-09: columnas "Meta" y "vs Meta" siempre visibles (metas por categoría × factor de período).
+- Removido: modal "Ver metas y cálculo", factor USD→MXN runtime y select de origen (disponibles en el historial git). El JSON `PRESUPUESTO_2026` queda embebido como fuente; `parse_presupuesto.py` sigue disponible para regenerarlo.
 
 ### FEAT-12: Conversión sobre TODAS las oportunidades
 - Nueva tarjeta "Conversión (Todas)": ganadas / total de opps del filtro (incluye abiertas), junto a las existentes por cerradas (opps y revenue).
 
 ### FEAT-13: Filtro por vendedor
 - Select "Vendedor" en Filtros (sidebar), combinable con equipo y período. Recalcula todas las métricas, KPIs, gráficas y tablas para una sola persona. Incluido en el banner de la instantánea.
+- El topbar muestra la selección activa: "· Vendedor: NOMBRE (Categoría)" o "· Equipo: X".
 
 ---
 
@@ -104,10 +104,6 @@ Usando el campo `Sum of Orders` del CRM (viene de `sale.order`):
 ### FEAT-02: Vista por rol funcional
 - **Estado:** Pendiente
 - **Descripción:** El dropdown de vistas no hace nada actualmente
-
-### Metas de venta (reactivar FEAT-11) — dirección acordada 2026-11-11
-- **Decisión:** enfoque híbrido a implementar y evaluar sobre la marcha: **meta global de compañía** (derivada del presupuesto 2026, promediada o por rangos) + **categorías de vendedor** (junior / senior / Sonora / foraneo, etc.) en lugar del presupuesto exacto por vendedor × mes. El mix por marca queda pospuesto.
-- El JSON `PRESUPUESTO_2026` embebido y `parse_presupuesto.py` siguen disponibles como fuente para derivar las categorías y la meta de compañía.
 
 ### FEAT-03: Logo real del cliente
 - **Estado:** Pendiente archivo del cliente
@@ -142,6 +138,7 @@ Esto incluye oportunidades activas + perdidas en un solo archivo.
 | 2026-11-10 | v1.5 | Fix BUG-06: normalización de exports de Odoo en español (encabezados, Is Won, Kanban State, etapas) |
 | 2026-11-10 | v1.6 | Features reunión stakeholders: instantánea HTML (FEAT-07), rango de fechas + datepicker (FEAT-08), ventas equipo→vendedor (FEAT-09), instrucciones visibles (FEAT-10), metas desde Presupuesto 2026 (FEAT-11) |
 | 2026-11-11 | v1.7 | Retro presentación: fix alertas (BUG-07), fix ganadas/perdidas por etapa (BUG-08), Conversión (Todas) (FEAT-12), filtro por vendedor (FEAT-13) |
+| 2026-11-11 | v1.8 | FEAT-11 implementado como metas estáticas híbridas: meta de compañía + categorías de vendedor (sin factor runtime ni modal) |
 
 ---
 
